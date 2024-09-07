@@ -92,7 +92,8 @@ def main(data_root, save_root):
 
     img_list = os.listdir(os.path.join(data_root, 'RGB'))
     for img_name in img_list:
-        img_path = os.path.join(data_root, img_name)
+        print(img_name, '...')
+        img_path = os.path.join(data_root, 'RGB', img_name)
         img = np.array(Image.open(img_path).convert('RGB'))
         mask = mask_generator.generate(img)
         img, mask = show_anns(mask)
