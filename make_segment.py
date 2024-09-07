@@ -44,7 +44,7 @@ def make_split(data_root, save_root):
 
     with open('{:s}/train_val_test.json'.format(save_root), 'w') as make_file:
         json.dump(json_data, make_file, indent='\t')
-def main(save_root):
+def main(data_root, save_root):
     # select the device for computation
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -68,7 +68,7 @@ def main(save_root):
             "See e.g. https://github.com/pytorch/pytorch/issues/84936 for a discussion."
         )
 
-    sam2_checkpoint = "../checkpoints/sam2_hiera_large.pt"
+    sam2_checkpoint = "/media/NAS/nas_187/siwoo/2024/UDA_citycapes/sam2_hiera_large.pt"
     model_cfg = "sam2_hiera_l.yaml"
 
     sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=False)
@@ -109,3 +109,5 @@ if __name__ == '__main__':
     save_root = '/media/NAS/nas_187/siwoo/2024/UDA_citycapes/synthia'
     make_split(data_root, save_root)
     main(data_root, save_root)
+
+    #CUDA_VISIBLE_DEVICES=0 python make_segment.py
