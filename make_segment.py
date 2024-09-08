@@ -68,7 +68,7 @@ def main(data_root, save_root):
             "See e.g. https://github.com/pytorch/pytorch/issues/84936 for a discussion."
         )
 
-    sam2_checkpoint = "/media/NAS/nas_187/siwoo/2024/UDA_citycapes/sam2_hiera_large.pt"
+    sam2_checkpoint = "/media/NAS/nas_70/siwoo_data/UDA_citycapes/sam2_hiera_large.pt"
     model_cfg = "sam2_hiera_l.yaml"
 
     sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=False)
