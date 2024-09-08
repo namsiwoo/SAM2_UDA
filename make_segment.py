@@ -74,21 +74,21 @@ def main(data_root, save_root):
     sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=False)
 
 
-    mask_generator = SAM2AutomaticMaskGenerator(sam2)
+    # mask_generator = SAM2AutomaticMaskGenerator(sam2)
 
-    # mask_generator_2 = SAM2AutomaticMaskGenerator(
-    #     model=sam2,
-    #     points_per_side=64,
-    #     points_per_batch=128,
-    #     pred_iou_thresh=0.7,
-    #     stability_score_thresh=0.92,
-    #     stability_score_offset=0.7,
-    #     crop_n_layers=1,
-    #     box_nms_thresh=0.7,
-    #     crop_n_points_downscale_factor=2,
-    #     min_mask_region_area=25.0,
-    #     use_m2m=True,
-    # )
+    mask_generator = SAM2AutomaticMaskGenerator(
+        model=sam2,
+        points_per_side=64,
+        points_per_batch=128,
+        pred_iou_thresh=0.7,
+        stability_score_thresh=0.92,
+        stability_score_offset=0.7,
+        crop_n_layers=1,
+        box_nms_thresh=0.7,
+        crop_n_points_downscale_factor=2,
+        min_mask_region_area=25.0,
+        use_m2m=True,
+    )
 
     img_list = os.listdir(os.path.join(data_root, 'RGB'))
     for img_name in img_list:
@@ -107,7 +107,7 @@ def main(data_root, save_root):
 
 if __name__ == '__main__':
     data_root = '/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES'
-    save_root = '/media/NAS/nas_187/siwoo/2024/UDA_citycapes/synthia'
+    save_root = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/synthia'
     make_split(data_root, save_root)
     main(data_root, save_root)
 
