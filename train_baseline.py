@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from Datasets.synthia_dataset import synthia_dataset
 from SS_model.deeplab_v3 import modeling
 
-from utils.compute_iou import IOU, fast_hist, per_class_iu
+from utils.compute_iou import DiceLoss, fast_hist, per_class_iu
 
 def main(args, device):
     f = open(os.path.join(args.result, 'log.txt'), 'w')
@@ -23,20 +23,15 @@ def main(args, device):
 
     import torch
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
-    for name, param in model.named_parameters():
-        print(f"name: {name}")
 
     model.backbone.conv1 = nn.Conv2d(6, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
     model.classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
     # model.aux_classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
 
-
-    print(model)
-
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
 
-    criterion_iou = IOU()
+    criterion_iou = DiceLoss()
     criterion_ce = torch.nn.CrossEntropyLoss()
 
 
@@ -62,9 +57,7 @@ def main(args, device):
             img = torch.cat((img, img2), dim=1)
 
             mask = batch[0][2].squeeze(1)
-            print(len(batch[0]))
             img_name = batch[1][0]
-            print(iter, img.shape, '--', mask.shape)
             pred = model(img)['out'][0]
 
             iou_loss = criterion_iou(pred, mask)
