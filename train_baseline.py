@@ -58,9 +58,9 @@ def main(args, device):
 
             mask = batch[0][2].squeeze(1)
             img_name = batch[1][0]
-            pred = model(img)['out'][0]
+            pred = model(img)['out']
 
-            print(pred.shape, mask.shape)
+            print(img.shape, pred.shape, mask.shape)
 
             iou_loss = criterion_dice(pred, mask)
             ce_loss = criterion_ce(pred, mask)
