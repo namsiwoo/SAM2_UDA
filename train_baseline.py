@@ -56,9 +56,9 @@ def main(args, device):
             img2 = batch[0][1]
             img = torch.cat((img, img2), dim=1)
 
-            mask = batch[0][2].squeeze(1)
+            mask = batch[0][2].squeeze(1).to(device)
             img_name = batch[1][0]
-            pred = model(img)['out']
+            pred = model(img.to(device))['out']
 
             print(img.shape, pred.shape, mask.shape)
 
