@@ -6,7 +6,7 @@ from .backbone import (
     hrnetv2,
     xception
 )
-
+# https://github.com/VainF/DeepLabV3Plus-Pytorch
 def _segm_hrnet(name, backbone_name, num_classes, pretrained_backbone):
 
     backbone = hrnetv2.__dict__[backbone_name](pretrained_backbone)
@@ -220,3 +220,4 @@ def deeplabv3plus_xception(num_classes=21, output_stride=8, pretrained_backbone=
         pretrained_backbone (bool): If True, use the pretrained backbone.
     """
     return _load_model('deeplabv3plus', 'xception', num_classes, output_stride=output_stride, pretrained_backbone=pretrained_backbone)
+

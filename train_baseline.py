@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from Datasets import synthia_dataset
 from SS_model.deeplab_v3 import modeling
 
-from utils.compute_iou import compute_mIoU, IOU
+from utils.compute_iou import IOU, fast_hist, per_class_iu
 
 def main(args, device):
     f = open(os.path.join(args.result, 'log.txt'), 'w')
@@ -17,8 +17,12 @@ def main(args, device):
     f.write(str(args))
     f.write('=' * 40)
 
-    model = modeling.__dict__[args.model_type](num_classes=12, output_stride=8)
-    model.load_state_dict(torch.load(args.model_path)['model_state'])
+    # model = modeling.__dict__[args.model_type](num_classes=12, output_stride=8)
+    # model.load_state_dict(torch.load(args.model_path)['model_state'])
+    # print(model)
+
+    import torch
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
     print(model)
 
     optimizer = torch.optim.AdamW(model.discriminator.parameters(), lr=args.lr)
@@ -47,30 +51,33 @@ def main(args, device):
         for iter, batch in enumerate(train_dataloader): # batch[0]
             img = batch[0][0]
             img2 = batch[0][1]
-            label = batch[0][2].squeeze(1)
+            img = torch.cat((img, img2), dim=1)
+
+            mask = batch[0][2].squeeze(1)
             img_name = batch[1][0]
 
+            pred = model(img)
 
+            iou_loss = criterion_iou(pred, mask)
+            ce_loss = criterion_ce(pred, mask)
+            loss = iou_loss + ce_loss
 
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-            # bce_loss, offset_gt, offset_loss, iou_loss = backwards
-            # bce_local_loss, iou_local_loss = backwards_local
             lr_scheduler.step()
-            lr_scheduler_dis.step()
-
-            loss = bce_loss + iou_loss + offset_loss + bce_local_loss + iou_local_loss +space_loss+ channel_loss #sam_model.loss_G.item()
 
             train_loss += loss / len(train_dataloader)
 
             if (iter + 1) % args.print_fq == 0:
-                print('{}/{} epoch, {}/{} batch, train loss: {}, bce: {}, iou: {}, offset: {} // local bce: {} iou: {} // space: {}, channel: {}'.format(epoch,
-                                                                                                        args.epochs,
-                                                                                                        iter + 1,
-                                                                                                        len(train_dataloader),
-                                                                                                        loss, bce_loss,
-                                                                                                        iou_loss,
-                                                                                                        offset_loss, bce_local_loss,
-                                                                                                        iou_local_loss, space_loss, channel_loss))
+                print('{}/{} epoch, {}/{} batch, train loss: {}, ce: {}, iou: {}'.format(epoch,
+                                                                                            args.epochs,
+                                                                                            iter + 1,
+                                                                                            len(train_dataloader),
+                                                                                            loss, ce_loss,
+                                                                                            iou_loss,
+                                                                                            ))
 
                 if args.plt == True:
                     import matplotlib.pyplot as plt
@@ -176,8 +183,6 @@ def main(args, device):
 
                     plt.savefig(os.path.join(args.result, 'img', str(epoch), str(iter) + 'ex.png'))
 
-            gc.collect()
-            torch.cuda.empty_cache()
         total_train_loss.append(train_loss)
         print('{} epoch, mean train loss: {}'.format(epoch, total_train_loss[-1]))
 
@@ -185,48 +190,27 @@ def main(args, device):
         #     save_checkpoint(os.path.join(args.result, 'model', str(epoch) + '_model.pth'), sam_model, epoch)
 
         if epoch >= args.start_val:
-            sam_model.eval()
-            mean_dice, mean_iou, mean_aji = 0, 0, 0
+            model.eval()
+            mean_iou = 0
+            hist = np.zeros((12, 12))
 
             with torch.no_grad():
                 for iter, pack in enumerate(val_dataloader):
-                    input = pack[0][0]
-                    mask = pack[0][1]
-                    img_name = pack[1][0]
-                    size = 224
+                    img = batch[0][0]
+                    img2 = batch[0][1]
+                    img = torch.cat((img, img2), dim=1)
+                    mask = batch[0][2].squeeze(1)
+                    img_name = batch[1][0]
 
-                    output, output_offset = split_forward(sam_model, input, args.img_size, device, args.num_hq_token, size)
-                    binary_mask = torch.sigmoid(output).detach().cpu().numpy()
+                    pred = model(img)
 
-                    if args.num_hq_token == 2:
-                        pred_flow_vis = flow_to_color(output_offset[0].detach().cpu().numpy().transpose(1, 2, 0))
-                        binary_map, instance_map, marker = make_instance_hv(binary_mask[0][0],
-                                                                            output_offset[0].detach().cpu().numpy())
-                    elif args.num_hq_token == 1:
-                        pred_flow_vis = output_offset[0][1].detach().cpu().numpy()
-                        pred_flow_vis = (pred_flow_vis-np.min(pred_flow_vis))/(np.max(pred_flow_vis)-np.min(pred_flow_vis))*255
-                        binary_map, instance_map, marker = make_instance_marker(binary_mask[0][0], output_offset[0][
-                            1].detach().cpu().numpy(), args.ord_th)
-                    else:
-                        bg = torch.zeros(1, 1, 1000, 1000) + args.ord_th  # K 0.15
-                        bg = bg.to(device)
-                        output_offset = torch.argmax(torch.cat([bg, output_offset], dim=1), dim=1)
-                        pred_flow_vis = ((output_offset[0].detach().cpu().numpy() * 255) / 9).astype(np.uint8)
-                        binary_map, instance_map, marker = make_instance_sonnet(binary_mask[0][0],
-                                                                                output_offset[0].detach().cpu().numpy())
+                    hist += fast_hist(mask.flatten(), pred.flatten(), 12)
+                    print('{:s}: {:0.2f}'.format(img_name, 100 * np.nanmean(per_class_iu(hist))))
 
-                    if len(np.unique(binary_map)) == 1:
-                        dice, iou, aji = 0, 0, 0
-                    else:
-                        # dice, iou = accuracy_object_level(instance_map, mask[0][0].detach().cpu().numpy())
-                        # aji = AJI_fast(mask[0][0].detach().cpu().numpy(), instance_map)
-                        dice, iou = accuracy_object_level(instance_map, mask[0][0].detach().cpu().numpy())
-                        aji = AJI_fast(mask[0][0].detach().cpu().numpy(), instance_map, img_name)
+                    mIoUs = per_class_iu(hist)
+                    print(mIoUs)
 
-                    mean_dice += dice / len(val_dataloader)  # *len(local_rank))
-                    mean_iou += iou / len(val_dataloader)  # len(local_rank))
-                    mean_aji += aji / len(val_dataloader)  # *len(local_rank))
-                    # print(len(val_dataloader), mean_dice, mean_aji)
+
 
                     instance_map = mk_colored(instance_map) * 255
                     instance_map = Image.fromarray((instance_map).astype(np.uint8))
