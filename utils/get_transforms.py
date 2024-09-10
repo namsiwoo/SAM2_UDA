@@ -218,19 +218,6 @@ class ToTensor(object):
             # pics.append(label_tensor.long())
             pics.append(label_tensor)# div(255)
 
-        if len(imgs)>2:
-            coords, label = imgs[-2]
-            # handle numpy array
-            coords_tensor = torch.from_numpy(coords)
-            label_tensor = torch.from_numpy(label)
-            # backward compatibility
-            pics.append(coords_tensor)
-            pics.append(label_tensor)
-
-            reverse_mask = imgs[-1]
-            reverse_mask = torch.from_numpy(reverse_mask.astype(np.int32))
-            pics.append(reverse_mask)
-
         return tuple(pics)
 
 
