@@ -8,7 +8,9 @@ from torch.utils.data import DataLoader
 from Datasets.synthia_dataset import synthia_dataset
 from SS_model.deeplab_v3 import modeling
 
+from utils.utils import mk_colored
 from utils.compute_iou import DiceLoss, fast_hist, per_class_iu
+
 
 def main(args, device):
     f = open(os.path.join(args.result, 'log.txt'), 'w')
@@ -60,8 +62,6 @@ def main(args, device):
             mask = batch[0][2].squeeze(1).to(device)
             img_name = batch[1][0]
             pred = model(img.to(device))['out']
-
-            print(img.shape, pred.shape, mask.shape)
 
             iou_loss = criterion_dice(pred, mask)
             ce_loss = criterion_ce(pred, mask)
@@ -204,10 +204,12 @@ def main(args, device):
                     img = batch[0][0]
                     img2 = batch[0][1]
                     img = torch.cat((img, img2), dim=1)
-                    mask = batch[0][2]
-                    img_name = batch[1][0]
 
-                    pred = model(img)
+                    mask = batch[0][2].squeeze(1).to(device)
+                    img_name = batch[1][0]
+                    pred = model(img.to(device))['out']
+                    pred = torch.argmax(pred, dim=1)
+                    pred = pred[0].detach().cpu().numpy()
 
                     hist += fast_hist(mask.flatten(), pred.flatten(), 12)
                     print('{:s}: {:0.2f}'.format(img_name, 100 * np.nanmean(per_class_iu(hist))))
