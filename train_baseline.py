@@ -3,7 +3,7 @@ import os, random, gc
 import argparse
 from PIL import Image
 import numpy as np
-from torch.nn import functional as F
+import torch.nn as nn
 from torch.utils.data import DataLoader
 from Datasets import synthia_dataset
 from SS_model.deeplab_v3 import modeling
@@ -23,9 +23,14 @@ def main(args, device):
 
     import torch
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
+    model.backbone[0] = nn.Conv2d(6, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+    model.classfier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
+    model.aux_classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
+
+
     print(model)
 
-    optimizer = torch.optim.AdamW(model.discriminator.parameters(), lr=args.lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model.optimizer, 20, eta_min=1.0e-7)
 
     criterion_iou = IOU()
@@ -407,7 +412,7 @@ def test(args, device):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
     parser.add_argument('--resume', default=0, type=int, help='')
-    parser.add_argument('--start_val', default=30, type=int)
+    parser.add_argument('--start_val', default=5, type=int)
     parser.add_argument('--plt', action='store_true')
 
     parser.add_argument('--train', action='store_true')
