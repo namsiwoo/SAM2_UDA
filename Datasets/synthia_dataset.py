@@ -51,9 +51,9 @@ class synthia_dataset(torch.utils.data.Dataset): #MO, CPM, CoNSeP
     def __getitem__(self, index):
         img_name = self.samples[index % len(self.samples[1])]
 
-        img1 = Image.open(os.path.join(self.args.img1_dir, self.split, img_name)).convert('RGB')
-        img2 = Image.open(os.path.join(self.args.img2_dir, self.split, img_name)).convert('RGB')
-        mask = Image.open(os.path.join(self.args.mask_dir, self.split, img_name)).convert('RGB')
+        img1 = Image.open(os.path.join(self.args.img1_dir, img_name)).convert('RGB')
+        img2 = Image.open(os.path.join(self.args.img2_dir, img_name)).convert('RGB')
+        mask = Image.open(os.path.join(self.args.mask_dir, img_name)).convert('RGB')
 
         sample = [img1, img2, mask]
 
