@@ -34,7 +34,7 @@ def main(args, device):
     print(model)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model.optimizer, 20, eta_min=1.0e-7)
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
 
     criterion_iou = IOU()
     criterion_ce = torch.nn.CrossEntropyLoss()
