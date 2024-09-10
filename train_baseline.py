@@ -63,7 +63,7 @@ def main(args, device):
 
             mask = batch[0][2].squeeze(1)
             img_name = batch[1][0]
-            print(iter, img.shape, '--')
+            print(iter, img.shape, '--', mask.shape)
             pred = model(img)['out'][0]
 
             iou_loss = criterion_iou(pred, mask)
