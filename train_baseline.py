@@ -28,7 +28,7 @@ def main(args, device):
 
     model.backbone.conv1 = nn.Conv2d(6, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
     model.classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
-    model.aux_classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
+    # model.aux_classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
 
 
     print(model)
