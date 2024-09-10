@@ -142,10 +142,6 @@ class ToTensor(object):
             raise ValueError('The number of images is smaller than separation index!')
 
         pics = []
-        if len(imgs)>2:
-            num_index = len(imgs)-2
-        else:
-            num_index = len(imgs)
 
         # process image
         for i in range(0, self.index):
