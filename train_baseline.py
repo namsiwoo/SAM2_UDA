@@ -62,6 +62,7 @@ def main(args, device):
             img = torch.cat((img, img2), dim=1)
 
             mask = batch[0][2].squeeze(1)
+            print(len(batch[0]))
             img_name = batch[1][0]
             print(iter, img.shape, '--', mask.shape)
             pred = model(img)['out'][0]
