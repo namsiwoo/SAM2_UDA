@@ -31,7 +31,7 @@ def main(args, device):
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
 
-    criterion_iou = DiceLoss()
+    criterion_dice = DiceLoss()
     criterion_ce = torch.nn.CrossEntropyLoss()
 
 
@@ -60,7 +60,9 @@ def main(args, device):
             img_name = batch[1][0]
             pred = model(img)['out'][0]
 
-            iou_loss = criterion_iou(pred, mask)
+            print(pred.shape, mask.shape)
+
+            iou_loss = criterion_dice(pred, mask)
             ce_loss = criterion_ce(pred, mask)
             loss = iou_loss + ce_loss
 
