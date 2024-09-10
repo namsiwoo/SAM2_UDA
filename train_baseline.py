@@ -205,13 +205,13 @@ def main(args, device):
                     img2 = batch[0][1]
                     img = torch.cat((img, img2), dim=1)
 
-                    mask = batch[0][2].squeeze(1).to(device)
+                    mask = batch[0][2].squeeze(1)
                     img_name = batch[1][0]
                     pred = model(img.to(device))['out']
                     pred = torch.argmax(pred, dim=1)
                     pred = pred[0].detach().cpu().numpy()
 
-                    hist += fast_hist(mask.flatten(), pred.flatten(), 12)
+                    hist += fast_hist(mask.numpy().flatten(), pred.detach().cpu().numpy().flatten(), 12)
                     print('{:s}: {:0.2f}'.format(img_name, 100 * np.nanmean(per_class_iu(hist))))
 
                     mIoUs = per_class_iu(hist)

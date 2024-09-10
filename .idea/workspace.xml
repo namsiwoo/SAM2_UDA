@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="adce4353-c36f-4d6a-ad46-49a92f4a38e5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train_baseline.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_baseline.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -63,7 +64,7 @@
       <workItem from="1725737413074" duration="187000" />
       <workItem from="1725737642502" duration="376000" />
       <workItem from="1725738034111" duration="13961000" />
-      <workItem from="1725914086030" duration="6999000" />
+      <workItem from="1725914086030" duration="7334000" />
     </task>
     <servers />
   </component>
