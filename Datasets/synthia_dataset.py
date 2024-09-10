@@ -9,7 +9,7 @@ from PIL import Image
 
 import matplotlib.pyplot as plt
 
-class syenthia_dataset(torch.utils.data.Dataset): #MO, CPM, CoNSeP
+class synthia_dataset(torch.utils.data.Dataset): #MO, CPM, CoNSeP
     def __init__(self, args, split):
         self.args = args
         self.split = split

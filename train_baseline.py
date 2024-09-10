@@ -5,7 +5,7 @@ from PIL import Image
 import numpy as np
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from Datasets.synthia_dataset import syenthia_dataset
+from Datasets.synthia_dataset import synthia_dataset
 from SS_model.deeplab_v3 import modeling
 
 from utils.compute_iou import IOU, fast_hist, per_class_iu
