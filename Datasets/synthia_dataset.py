@@ -42,7 +42,7 @@ class synthia_dataset(torch.utils.data.Dataset): #MO, CPM, CoNSeP
 
 
     def read_samples(self, split):
-        with open(os.path.join(self.args.img2_dir, 'masks', 'train_val_test.json')) as f:
+        with open(os.path.join(self.args.img2_dir, 'train_val_test.json')) as f:
             split_dict = json.load(f)
         filename_list = split_dict[split]
 
