@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 import json
 import torch
+import torch.nn as nn
 from PIL import Image
 from os.path import join
 
