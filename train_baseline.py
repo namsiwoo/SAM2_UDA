@@ -207,7 +207,7 @@ def main(args, device):
                     img = batch[0][0]
                     img2 = batch[0][1]
                     img = torch.cat((img, img2), dim=1)
-                    mask = batch[0][2].squeeze(1)
+                    mask = batch[0][2]
                     img_name = batch[1][0]
 
                     pred = model(img)
