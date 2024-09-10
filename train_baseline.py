@@ -427,7 +427,7 @@ if __name__ == '__main__':
     parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES/GT/LABELS')
 
     parser.add_argument('--epochs', default=100, type=int, help='')
-    parser.add_argument('--batch_size', type=int, default=1, help='')
+    parser.add_argument('--batch_size', type=int, default=4, help='')
     parser.add_argument('--lr', default=1e-4, type=float)
 
     parser.add_argument('--print_fq', default=15, type=int, help='')
