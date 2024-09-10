@@ -24,7 +24,7 @@ def main(args, device):
     import torch
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
     for name, param in model.named_parameters():
-        print(f"name: {name} \nparams: {param}")
+        print(f"name: {name}")
 
     model.backbone[0] = nn.Conv2d(6, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
     model.classfier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
