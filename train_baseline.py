@@ -216,8 +216,8 @@ def main(args, device, class_list):
                     hist += fast_hist(mask.numpy().flatten(), pred.flatten(), args.num_classes+1)
 
                     mIoUs = per_class_iu(hist)
-                    print(mIoUs)
                     ave_mIOUs.append(mIoUs)
+                    print(np.array(ave_mIOUs).shape, np.mean(ave_mIOUs).shape)
 
                     pred = mk_colored(pred) * 255
                     pred = Image.fromarray((pred).astype(np.uint8))
@@ -227,11 +227,11 @@ def main(args, device, class_list):
                     mask = Image.fromarray((mask).astype(np.uint8))
                     mask.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_mask.png'))
 
-                ave_mIOUs = np.sum(np.array(ave_mIOUs), axis=0)
+                ave_mIOUs = np.mean(np.array(ave_mIOUs), axis=0)
                 f = open(os.path.join(args.result, 'img', str(epoch), "result.txt"), 'w')
                 f.write('***test result_mask*** class_name\t{:s}'.format('\t'.join(class_list)))
                 f.write('***test result_mask*** mIOU\t{:s}'.format('\t'.join(ave_mIOUs.tolist())))
-                f.write('***test result_mask*** ave mIOU\t{:s}'.format(str(np.sum(ave_mIOUs))))
+                f.write('***test result_mask*** ave mIOU\t{:s}'.format(str(np.nanmean(ave_mIOUs))))
                 f.close()
 
                 if max_miou < np.sum(ave_mIOUs):
