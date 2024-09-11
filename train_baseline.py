@@ -210,6 +210,7 @@ def main(args, device):
                     pred = model(img.to(device))['out']
                     pred = torch.argmax(pred, dim=1)
                     pred = pred[0].detach().cpu().numpy()
+                    print(mask.shape, pred.shape)
 
                     hist += fast_hist(mask.numpy().flatten(), pred.flatten(), 12)
                     print('{:s}: {:0.2f}'.format(img_name, 100 * np.nanmean(per_class_iu(hist))))
