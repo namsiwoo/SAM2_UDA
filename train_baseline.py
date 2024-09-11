@@ -241,7 +241,7 @@ def main(args, device, class_list):
                     save_checkpoint(os.path.join(args.result, 'model', 'Dice_best_model.pth'), model, epoch)
                     max_miou = np.nanmean(ave_mIOUs)
 
-                print(epoch, ': ave mIOU\t{:s}'.format(str(np.nanmean(ave_mIOUs))))
+                print(epoch, ': ave mIOU\t{:s} (b mIOU: {}'.format(str(np.nanmean(ave_mIOUs)), max_miou))
 
 
 def test(args, device):
