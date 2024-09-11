@@ -147,6 +147,7 @@ class ToTensor(object):
         # process image
         for i in range(0, self.index):
             img = imgs[i]
+            print(img.mode)
             if isinstance(img, np.ndarray):
                 # handle numpy array
                 pic = torch.from_numpy(img.transpose((2, 0, 1)))
