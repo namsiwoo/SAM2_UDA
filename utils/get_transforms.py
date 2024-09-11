@@ -147,7 +147,6 @@ class ToTensor(object):
         # process image
         for i in range(0, self.index):
             img = imgs[i]
-            print(img.mode, 'img', i)
             if isinstance(img, np.ndarray):
                 # handle numpy array
                 pic = torch.from_numpy(img.transpose((2, 0, 1)))
@@ -190,7 +189,6 @@ class ToTensor(object):
 
             # handle PIL Image
             # ipdb.set_trace()
-            print(label.mode, 'label', 'i')
 
             if label.mode == 'I':
                 label_tensor = torch.from_numpy(np.array(label, np.int32, copy=True)).long()
