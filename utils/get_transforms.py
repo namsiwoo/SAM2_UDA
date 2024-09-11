@@ -159,7 +159,8 @@ class ToTensor(object):
                 elif img.mode == 'I;16':
                     pic = torch.from_numpy(np.array(img, np.int16, copy=False))
                 else:
-                    pic = torch.ByteTensor(torch.ByteStorage.from_buffer(img.tobytes()))
+                    # pic = torch.ByteTensor(torch.ByteStorage.from_buffer(img.tobytes()))
+                    pic = torch.ByteTensor(torch.UntypedStorage.from_buffer(img.tobytes()))
                 # PIL image mode: 1, L, P, I, F, RGB, YCbCr, RGBA, CMYK
                 if img.mode == 'YCbCr':
                     nchannel = 3
