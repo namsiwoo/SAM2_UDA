@@ -213,7 +213,7 @@ def main(args, device, class_list):
                     pred = torch.argmax(pred, dim=1)
                     pred = pred[0].detach().cpu().numpy()
 
-                    hist += fast_hist(mask.numpy().flatten(), pred.flatten(), args.num_classes)
+                    hist += fast_hist(mask.numpy().flatten(), pred.flatten(), args.num_classes+1)
 
                     mIoUs = per_class_iu(hist)
                     ave_mIOUs.append(mIoUs)
