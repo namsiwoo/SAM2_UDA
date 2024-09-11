@@ -217,7 +217,7 @@ def main(args, device, class_list):
 
                     mIoUs = per_class_iu(hist)
                     ave_mIOUs.append(mIoUs)
-                    print(np.array(ave_mIOUs).shape, np.mean(ave_mIOUs).shape)
+                    print(np.array(ave_mIOUs).shape, np.mean(ave_mIOUs, axis=0).shape)
 
                     pred = mk_colored(pred) * 255
                     pred = Image.fromarray((pred).astype(np.uint8))
