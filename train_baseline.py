@@ -55,142 +55,142 @@ def main(args, device, class_list):
         model.train()
         train_loss = 0
 
-        for iter, batch in enumerate(train_dataloader): # batch[0]
-            img = batch[0][0]
-            img2 = batch[0][1]
-            img = torch.cat((img, img2), dim=1)
-
-            mask = batch[0][2].squeeze(1).to(device)
-            img_name = batch[1][0]
-            pred = model(img.to(device))['out']
-
-            iou_loss = criterion_dice(pred, mask)
-            ce_loss = criterion_ce(pred, mask)
-            loss = iou_loss + ce_loss
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            lr_scheduler.step()
-
-            train_loss += loss / len(train_dataloader)
-
-            if (iter + 1) % args.print_fq == 0:
-                print('{}/{} epoch, {}/{} batch, train loss: {}, ce: {}, iou: {}'.format(epoch,
-                                                                                            args.epochs,
-                                                                                            iter + 1,
-                                                                                            len(train_dataloader),
-                                                                                            loss, ce_loss,
-                                                                                            iou_loss,
-                                                                                            ))
-
-                if args.plt == True:
-                    import matplotlib.pyplot as plt
-
-                    def norm(img):
-                        return (img - np.min(img)) / (np.max(img) - np.min(img))
-
-                    plt.clf()
-                    img1 = norm(batch[0][0].detach().cpu().numpy()[0].transpose(1, 2, 0))
-                    if args.num_hq_token == 1:
-                        plt.subplot(1, 5, 1)
-                        plt.imshow(img1)
-                        plt.subplot(1, 5, 2)
-                        plt.imshow(low_res_masks.detach().cpu().numpy()[0, 0])
-
-                        from scipy.ndimage.morphology import binary_dilation
-                        point = binary_dilation(point.detach().cpu().numpy()[0, 0], iterations=2)
-                        plt.subplot(1, 5, 3)
-                        plt.imshow(point)
-
-                        plt.subplot(1, 5, 4)
-                        plt.imshow(offset_gt.detach().cpu().numpy()[0])
-                        plt.colorbar()
-                        plt.subplot(1, 5, 5)
-                        plt.imshow(hq_mask.detach().cpu().numpy()[0, 1])
-                    else:
-                        plt.subplot(2, 4, 1)
-                        plt.imshow(img1)
-                        plt.subplot(2, 4, 2)
-                        # plt.imshow(label.detach().cpu().numpy()[0])
-                        plt.imshow(low_res_masks.detach().cpu().numpy()[0, 0])
-
-                        if args.num_hq_token >= 3:
-                            plt.subplot(2, 4, 3)
-                            # plt.imshow(low_res_masks.detach().cpu().numpy()[0,0])
-                            plt.imshow(hq_mask.detach().cpu().numpy()[0, -1])
-                            plt.colorbar()
-
-                            plt.subplot(2, 4, 4)
-                            plt.imshow(offset_gt.detach().cpu().numpy()[0][-1])
-                            plt.colorbar()
-
-                        # plt.subplot(2, 4, 3)
-                        # plt.imshow(offset_gt.detach().cpu().numpy()[0][0]>1)
-                        # plt.colorbar()
-                        #
-                        # plt.subplot(2, 4, 4)
-                        # plt.imshow(offset_gt.detach().cpu().numpy()[0][0]<-1)
-                        # plt.colorbar()
-
-                        plt.subplot(2, 4, 5)
-                        plt.imshow(hq_mask.detach().cpu().numpy()[0, 0])
-                        plt.colorbar()
-
-                        plt.subplot(2, 4, 6)
-                        plt.imshow(hq_mask.detach().cpu().numpy()[0, 1])
-                        plt.colorbar()
-
-                        plt.subplot(1, 4, 3)
-                        # plt.imshow(point.numpy()[0][0])
-                        plt.imshow(offset_gt.detach().cpu().numpy()[0][0])
-                        plt.colorbar()
-
-                        plt.subplot(1, 4, 4)
-                        plt.imshow(offset_gt.detach().cpu().numpy()[0][1])
-                        plt.colorbar()
-
-
-
-                        # def colorize(ch, vmin=None, vmax=None):
-                        #     """Will clamp value value outside the provided range to vmax and vmin."""
-                        #     cmap = plt.get_cmap("jet")
-                        #     ch = np.squeeze(ch.astype("float32"))
-                        #     vmin = vmin if vmin is not None else ch.min()
-                        #     vmax = vmax if vmax is not None else ch.max()
-                        #     ch[ch > vmax] = vmax  # clamp value
-                        #     ch[ch < vmin] = vmin
-                        #     ch = (ch - vmin) / (vmax - vmin + 1.0e-16)
-                        #     # take RGB from RGBA heat map
-                        #     ch_cmap = (cmap(ch)[..., :3] * 255).astype("uint8")
-                        #     return ch_cmap
-                        #
-                        # aaa = torch.sigmoid(low_res_masks).detach().cpu().numpy()[0, 0]
-                        # aaa = (aaa-np.min(aaa))/(np.max(aaa)-np.min(aaa))
-                        # aaa = Image.fromarray((aaa*255).astype(np.uint8))
-                        # aaa.save(os.path.join(args.result, str(epoch), img_name+ '_binary.png'))
-                        #
-                        # aaa = hq_mask.detach().cpu().numpy()[0, 1]
-                        # aaa = colorize(aaa)
-                        # aaa = Image.fromarray(aaa)
-                        # aaa.save(os.path.join(args.result, str(epoch), img_name+ '_h.png'))
-                        #
-                        # aaa = hq_mask.detach().cpu().numpy()[0, 0]
-                        # aaa = colorize(aaa)
-                        # aaa = Image.fromarray(aaa)
-                        # aaa.save(os.path.join(args.result, str(epoch), img_name+ '_v.png'))
-                        #
-                        # binary_map, instance_map, marker = make_instance_hv(torch.sigmoid(low_res_masks)[0][0].detach().cpu().numpy(),
-                        #                                                     hq_mask[0].detach().cpu().numpy())
-                        # instance_map = mk_colored(instance_map) * 255
-                        # instance_map = Image.fromarray((instance_map).astype(np.uint8))
-                        # instance_map.save(os.path.join(args.result, str(epoch), img_name+ '_inst.png'))
-
-                    plt.savefig(os.path.join(args.result, 'img', str(epoch), str(iter) + 'ex.png'))
-
-        total_train_loss.append(train_loss)
-        print('{} epoch, mean train loss: {}'.format(epoch, total_train_loss[-1]))
+        # for iter, batch in enumerate(train_dataloader): # batch[0]
+        #     img = batch[0][0]
+        #     img2 = batch[0][1]
+        #     img = torch.cat((img, img2), dim=1)
+        #
+        #     mask = batch[0][2].squeeze(1).to(device)
+        #     img_name = batch[1][0]
+        #     pred = model(img.to(device))['out']
+        #
+        #     iou_loss = criterion_dice(pred, mask)
+        #     ce_loss = criterion_ce(pred, mask)
+        #     loss = iou_loss + ce_loss
+        #
+        #     optimizer.zero_grad()
+        #     loss.backward()
+        #     optimizer.step()
+        #
+        #     lr_scheduler.step()
+        #
+        #     train_loss += loss / len(train_dataloader)
+        #
+        #     if (iter + 1) % args.print_fq == 0:
+        #         print('{}/{} epoch, {}/{} batch, train loss: {}, ce: {}, iou: {}'.format(epoch,
+        #                                                                                     args.epochs,
+        #                                                                                     iter + 1,
+        #                                                                                     len(train_dataloader),
+        #                                                                                     loss, ce_loss,
+        #                                                                                     iou_loss,
+        #                                                                                     ))
+        #
+        #         if args.plt == True:
+        #             import matplotlib.pyplot as plt
+        #
+        #             def norm(img):
+        #                 return (img - np.min(img)) / (np.max(img) - np.min(img))
+        #
+        #             plt.clf()
+        #             img1 = norm(batch[0][0].detach().cpu().numpy()[0].transpose(1, 2, 0))
+        #             if args.num_hq_token == 1:
+        #                 plt.subplot(1, 5, 1)
+        #                 plt.imshow(img1)
+        #                 plt.subplot(1, 5, 2)
+        #                 plt.imshow(low_res_masks.detach().cpu().numpy()[0, 0])
+        #
+        #                 from scipy.ndimage.morphology import binary_dilation
+        #                 point = binary_dilation(point.detach().cpu().numpy()[0, 0], iterations=2)
+        #                 plt.subplot(1, 5, 3)
+        #                 plt.imshow(point)
+        #
+        #                 plt.subplot(1, 5, 4)
+        #                 plt.imshow(offset_gt.detach().cpu().numpy()[0])
+        #                 plt.colorbar()
+        #                 plt.subplot(1, 5, 5)
+        #                 plt.imshow(hq_mask.detach().cpu().numpy()[0, 1])
+        #             else:
+        #                 plt.subplot(2, 4, 1)
+        #                 plt.imshow(img1)
+        #                 plt.subplot(2, 4, 2)
+        #                 # plt.imshow(label.detach().cpu().numpy()[0])
+        #                 plt.imshow(low_res_masks.detach().cpu().numpy()[0, 0])
+        #
+        #                 if args.num_hq_token >= 3:
+        #                     plt.subplot(2, 4, 3)
+        #                     # plt.imshow(low_res_masks.detach().cpu().numpy()[0,0])
+        #                     plt.imshow(hq_mask.detach().cpu().numpy()[0, -1])
+        #                     plt.colorbar()
+        #
+        #                     plt.subplot(2, 4, 4)
+        #                     plt.imshow(offset_gt.detach().cpu().numpy()[0][-1])
+        #                     plt.colorbar()
+        #
+        #                 # plt.subplot(2, 4, 3)
+        #                 # plt.imshow(offset_gt.detach().cpu().numpy()[0][0]>1)
+        #                 # plt.colorbar()
+        #                 #
+        #                 # plt.subplot(2, 4, 4)
+        #                 # plt.imshow(offset_gt.detach().cpu().numpy()[0][0]<-1)
+        #                 # plt.colorbar()
+        #
+        #                 plt.subplot(2, 4, 5)
+        #                 plt.imshow(hq_mask.detach().cpu().numpy()[0, 0])
+        #                 plt.colorbar()
+        #
+        #                 plt.subplot(2, 4, 6)
+        #                 plt.imshow(hq_mask.detach().cpu().numpy()[0, 1])
+        #                 plt.colorbar()
+        #
+        #                 plt.subplot(1, 4, 3)
+        #                 # plt.imshow(point.numpy()[0][0])
+        #                 plt.imshow(offset_gt.detach().cpu().numpy()[0][0])
+        #                 plt.colorbar()
+        #
+        #                 plt.subplot(1, 4, 4)
+        #                 plt.imshow(offset_gt.detach().cpu().numpy()[0][1])
+        #                 plt.colorbar()
+        #
+        #
+        #
+        #                 # def colorize(ch, vmin=None, vmax=None):
+        #                 #     """Will clamp value value outside the provided range to vmax and vmin."""
+        #                 #     cmap = plt.get_cmap("jet")
+        #                 #     ch = np.squeeze(ch.astype("float32"))
+        #                 #     vmin = vmin if vmin is not None else ch.min()
+        #                 #     vmax = vmax if vmax is not None else ch.max()
+        #                 #     ch[ch > vmax] = vmax  # clamp value
+        #                 #     ch[ch < vmin] = vmin
+        #                 #     ch = (ch - vmin) / (vmax - vmin + 1.0e-16)
+        #                 #     # take RGB from RGBA heat map
+        #                 #     ch_cmap = (cmap(ch)[..., :3] * 255).astype("uint8")
+        #                 #     return ch_cmap
+        #                 #
+        #                 # aaa = torch.sigmoid(low_res_masks).detach().cpu().numpy()[0, 0]
+        #                 # aaa = (aaa-np.min(aaa))/(np.max(aaa)-np.min(aaa))
+        #                 # aaa = Image.fromarray((aaa*255).astype(np.uint8))
+        #                 # aaa.save(os.path.join(args.result, str(epoch), img_name+ '_binary.png'))
+        #                 #
+        #                 # aaa = hq_mask.detach().cpu().numpy()[0, 1]
+        #                 # aaa = colorize(aaa)
+        #                 # aaa = Image.fromarray(aaa)
+        #                 # aaa.save(os.path.join(args.result, str(epoch), img_name+ '_h.png'))
+        #                 #
+        #                 # aaa = hq_mask.detach().cpu().numpy()[0, 0]
+        #                 # aaa = colorize(aaa)
+        #                 # aaa = Image.fromarray(aaa)
+        #                 # aaa.save(os.path.join(args.result, str(epoch), img_name+ '_v.png'))
+        #                 #
+        #                 # binary_map, instance_map, marker = make_instance_hv(torch.sigmoid(low_res_masks)[0][0].detach().cpu().numpy(),
+        #                 #                                                     hq_mask[0].detach().cpu().numpy())
+        #                 # instance_map = mk_colored(instance_map) * 255
+        #                 # instance_map = Image.fromarray((instance_map).astype(np.uint8))
+        #                 # instance_map.save(os.path.join(args.result, str(epoch), img_name+ '_inst.png'))
+        #
+        #             plt.savefig(os.path.join(args.result, 'img', str(epoch), str(iter) + 'ex.png'))
+        #
+        # total_train_loss.append(train_loss)
+        # print('{} epoch, mean train loss: {}'.format(epoch, total_train_loss[-1]))
 
         # if epoch % 5 == 0:
         #     save_checkpoint(os.path.join(args.result, 'model', str(epoch) + '_model.pth'), sam_model, epoch)
@@ -216,6 +216,7 @@ def main(args, device, class_list):
                     hist += fast_hist(mask.numpy().flatten(), pred.flatten(), args.num_classes+1)
 
                     mIoUs = per_class_iu(hist)
+                    print(mIoUs)
                     ave_mIOUs.append(mIoUs)
 
                     pred = mk_colored(pred) * 255
