@@ -230,7 +230,7 @@ def main(args, device, class_list):
 
                 ave_mIOUs = np.mean(np.array(ave_mIOUs), axis=0)
                 print(ave_mIOUs)
-                print('\t'.join(ave_mIOUs.tolist()))
+                print('\t'.join(str(ave_mIOUs.tolist())))
                 f = open(os.path.join(args.result, 'img', str(epoch), "result.txt"), 'w')
                 f.write('***test result_mask*** class_name\t{:s}'.format('\t'.join(class_list)))
                 f.write('***test result_mask*** mIOU\t{:s}'.format(str('\t'.join(ave_mIOUs.tolist()))))
