@@ -1,5 +1,5 @@
 import os, json
-
+import cv2
 import numpy as np
 import torch.nn as nn
 import torch.utils.data
@@ -53,7 +53,10 @@ class synthia_dataset(torch.utils.data.Dataset): #MO, CPM, CoNSeP
 
         img1 = Image.open(os.path.join(self.args.img1_dir, img_name)).convert('RGB')
         img2 = Image.open(os.path.join(self.args.img2_dir, 'vis', img_name)).convert('RGB')
-        mask = Image.open(os.path.join(self.args.mask_dir, img_name)).convert('I;16')
+
+        mask = cv2.imread(os.path.join(self.args.mask_dir, img_name), cv2.IMREAD_UNCHANGED)
+        # mask = Image.open(os.path.join(self.args.mask_dir, img_name)).convert('I;16')
+        mask = Image.fromarray(mask[:, :, 2].astype(np.uint8))
 
         sample = [img1, img2, mask]
 

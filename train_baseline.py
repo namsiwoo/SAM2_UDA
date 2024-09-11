@@ -43,6 +43,9 @@ def main(args, device):
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, drop_last=True, num_workers=8)
     val_dataloader = DataLoader(val_dataset)
+    class_list = ['void', 'sky', 'building', 'road', 'sidewalk', 'fence', 'vegetation', 'pole', 'car', 'traffic sign',
+                  'pedestrian', 'bicycle', 'motorcycle', 'parking-slot', 'road-work', 'traffic light', 'terrain',
+                  'rider', 'truck', 'bus', 'train', 'wall', 'lanemarking']
 
     max_miou = 0
     total_train_loss = []
