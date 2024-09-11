@@ -1,4 +1,5 @@
 import random
+import torch
 import numpy as np
 
 def mk_colored(instance_img):
