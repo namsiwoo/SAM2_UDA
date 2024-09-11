@@ -200,7 +200,7 @@ def main(args, device):
             hist = np.zeros((12, 12))
 
             with torch.no_grad():
-                for iter, pack in enumerate(val_dataloader):
+                for iter, batch in enumerate(val_dataloader):
                     img = batch[0][0]
                     img2 = batch[0][1]
                     img = torch.cat((img, img2), dim=1)
