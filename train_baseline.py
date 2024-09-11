@@ -203,6 +203,8 @@ def main(args, device, class_list):
 
             with torch.no_grad():
                 for iter, batch in enumerate(val_dataloader):
+                    if iter == 10:
+                        break
                     img = batch[0][0]
                     img2 = batch[0][1]
                     img = torch.cat((img, img2), dim=1)
@@ -229,7 +231,7 @@ def main(args, device, class_list):
                 ave_mIOUs = np.mean(np.array(ave_mIOUs), axis=0)
                 f = open(os.path.join(args.result, 'img', str(epoch), "result.txt"), 'w')
                 f.write('***test result_mask*** class_name\t{:s}'.format('\t'.join(class_list)))
-                f.write('***test result_mask*** mIOU\t{:s}'.format('\t'.join(ave_mIOUs.tolist())))
+                f.write('***test result_mask*** mIOU\t{:s}'.format(str('\t'.join(ave_mIOUs.tolist()))))
                 f.write('***test result_mask*** ave mIOU\t{:s}'.format(str(np.nanmean(ave_mIOUs))))
                 f.close()
 
