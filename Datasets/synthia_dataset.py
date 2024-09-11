@@ -52,8 +52,8 @@ class synthia_dataset(torch.utils.data.Dataset): #MO, CPM, CoNSeP
         img_name = self.samples[index % len(self.samples[1])]
 
         img1 = Image.open(os.path.join(self.args.img1_dir, img_name)).convert('RGB')
-        # img2 = Image.open(os.path.join(self.args.img2_dir, 'vis', img_name)).convert('RGB')
-        img2 = Image.open(os.path.join(self.args.img2_dir, 'vis_default', img_name)).convert('RGB')
+        img2 = Image.open(os.path.join(self.args.img2_dir, 'vis', img_name)).convert('RGB')
+        # img2 = Image.open(os.path.join(self.args.img2_dir, 'vis_default', img_name)).convert('RGB')
 
         mask = cv2.imread(os.path.join(self.args.mask_dir, img_name), cv2.IMREAD_UNCHANGED)
         # mask = Image.open(os.path.join(self.args.mask_dir, img_name)).convert('I;16')
