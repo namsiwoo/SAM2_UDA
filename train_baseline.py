@@ -27,7 +27,7 @@ def main(args, device):
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
 
     model.backbone.conv1 = nn.Conv2d(6, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
-    model.classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
+    model.classifier[-1] = nn.Conv2d(256, args.num_classes+1, kernel_size=(1, 1), stride=(1, 1))
     # model.aux_classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
     model = model.to(device)
 
@@ -46,6 +46,7 @@ def main(args, device):
 
     max_miou = 0
     total_train_loss = []
+    class_index = []
     for epoch in range(args.epochs):
         if args.resume != 0:
             epoch += args.resume
@@ -60,6 +61,7 @@ def main(args, device):
             img = torch.cat((img, img2), dim=1)
 
             mask = batch[0][2].squeeze(1).to(device)
+            class_index.append([k for k in np.unique(mask.detach().cpu().numpy())])
             img_name = batch[1][0]
             pred = model(img.to(device))['out']
 
@@ -190,6 +192,7 @@ def main(args, device):
 
         total_train_loss.append(train_loss)
         print('{} epoch, mean train loss: {}'.format(epoch, total_train_loss[-1]))
+        print(np.unique(np.array(class_index)))
 
         # if epoch % 5 == 0:
         #     save_checkpoint(os.path.join(args.result, 'model', str(epoch) + '_model.pth'), sam_model, epoch)
@@ -197,7 +200,7 @@ def main(args, device):
         if epoch >= args.start_val:
             model.eval()
             mean_iou = 0
-            hist = np.zeros((12, 12))
+            hist = np.zeros((args.num_classes, args.num_classes))
 
             with torch.no_grad():
                 for iter, batch in enumerate(val_dataloader):
@@ -212,7 +215,7 @@ def main(args, device):
                     pred = pred[0].detach().cpu().numpy()
                     print(mask.shape, pred.shape)
 
-                    hist += fast_hist(mask.numpy().flatten(), pred.flatten(), 12)
+                    hist += fast_hist(mask.numpy().flatten(), pred.flatten(), args.num_classes)
                     print('{:s}: {:0.2f}'.format(img_name, 100 * np.nanmean(per_class_iu(hist))))
 
                     mIoUs = per_class_iu(hist)
@@ -416,6 +419,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
     parser.add_argument('--resume', default=0, type=int, help='')
     parser.add_argument('--start_val', default=5, type=int)
+    parser.add_argument('--num_classes', default=12, type=int)
     parser.add_argument('--plt', action='store_true')
 
     parser.add_argument('--train', action='store_true')

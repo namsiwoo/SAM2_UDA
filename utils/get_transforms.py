@@ -189,6 +189,7 @@ class ToTensor(object):
 
             # handle PIL Image
             # ipdb.set_trace()
+            print(label.mode)
 
             if label.mode == 'I':
                 label_tensor = torch.from_numpy(np.array(label, np.int32, copy=True)).long()
