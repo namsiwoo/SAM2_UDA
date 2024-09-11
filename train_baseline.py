@@ -26,7 +26,10 @@ def main(args, device, class_list):
     import torch
     model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
 
-    model.backbone.conv1 = nn.Conv2d(6, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+    input_channel = 3
+    if args.use_sam == True:
+        input_channel = 6
+    model.backbone.conv1 = nn.Conv2d(input_channel, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
     model.classifier[-1] = nn.Conv2d(256, args.num_classes+1, kernel_size=(1, 1), stride=(1, 1))
     # model.aux_classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
     model = model.to(device)
@@ -57,8 +60,9 @@ def main(args, device, class_list):
 
         for iter, batch in enumerate(train_dataloader): # batch[0]
             img = batch[0][0]
-            img2 = batch[0][1]
-            img = torch.cat((img, img2), dim=1)
+            if args.use_sam == True:
+                img2 = batch[0][1]
+                img = torch.cat((img, img2), dim=1)
 
             mask = batch[0][2].squeeze(1).to(device)
             img_name = batch[1][0]
@@ -202,8 +206,9 @@ def main(args, device, class_list):
                     if iter == 10:
                         break
                     img = batch[0][0]
-                    img2 = batch[0][1]
-                    img = torch.cat((img, img2), dim=1)
+                    if args.use_sam == True:
+                        img2 = batch[0][1]
+                        img = torch.cat((img, img2), dim=1)
 
                     mask = batch[0][2].squeeze(1)[0]
                     img_name = batch[1][0]
@@ -396,6 +401,7 @@ if __name__ == '__main__':
     parser.add_argument('--start_val', default=5, type=int)
     parser.add_argument('--num_classes', default=22, type=int)
     parser.add_argument('--plt', action='store_true')
+    parser.add_argument('--use_sam', action='store_true')
 
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--test', action='store_true')

@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="adce4353-c36f-4d6a-ad46-49a92f4a38e5" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/train_baseline.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_baseline.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datasets/synthia_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/synthia_dataset.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,11 +64,22 @@
       <workItem from="1725737642502" duration="376000" />
       <workItem from="1725738034111" duration="13961000" />
       <workItem from="1725914086030" duration="14376000" />
-      <workItem from="1726077675957" duration="5494000" />
+      <workItem from="1726077675957" duration="5803000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/train_baseline.py</url>
+          <line>87</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
