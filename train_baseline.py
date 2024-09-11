@@ -221,28 +221,13 @@ def main(args, device):
                     mIoUs = per_class_iu(hist)
                     print(mIoUs)
 
+                    pred = mk_colored(pred) * 255
+                    pred = Image.fromarray((pred).astype(np.uint8))
+                    pred.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_pred.png'))
 
-
-                    instance_map = mk_colored(instance_map) * 255
-                    instance_map = Image.fromarray((instance_map).astype(np.uint8))
-                    instance_map.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_pred_inst.png'))
-
-                    marker = mk_colored(marker) * 255
-                    marker = Image.fromarray((marker).astype(np.uint8))
-                    marker.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_marker.png'))
-
-                    binary_map = mk_colored(binary_map) * 255
-                    binary_map = Image.fromarray((binary_map).astype(np.uint8))
-                    binary_map.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_pred.png'))
-
-                    pred_flow_vis = Image.fromarray(pred_flow_vis.astype(np.uint8))
-                    pred_flow_vis.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_flow_vis.png'))
-
-                    mask = mk_colored(mask[0][0].detach().cpu().numpy()) * 255
+                    mask = mk_colored(mask.detach().cpu().numpy()) * 255
                     mask = Image.fromarray((mask).astype(np.uint8))
                     mask.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_mask.png'))
-
-                    del binary_map, instance_map, marker, pred_flow_vis, mask, input
 
                 f = open(os.path.join(args.result, 'img', str(epoch), "result.txt"), 'w')
                 f.write('***test result_mask*** Average- Dice\tIOU\tAJI: '
