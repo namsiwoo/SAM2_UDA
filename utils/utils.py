@@ -20,3 +20,9 @@ def get_random_color():
     ''' generate rgb using a list comprehension '''
     r, g, b = [random.random() for i in range(3)]
     return r, g, b
+
+def save_checkpoint(save_path, model, epoch):
+    state_dict = model.state_dict()
+    for key in state_dict.keys():
+        state_dict[key] = state_dict[key].cpu()
+    torch.save({'epoch': epoch + 1, 'state_dict': state_dict}, save_path)

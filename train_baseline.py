@@ -8,11 +8,11 @@ from torch.utils.data import DataLoader
 from Datasets.synthia_dataset import synthia_dataset
 from SS_model.deeplab_v3 import modeling
 
-from utils.utils import mk_colored
+from utils.utils import mk_colored, save_checkpoint
 from utils.compute_iou import DiceLoss, fast_hist, per_class_iu
 
 
-def main(args, device):
+def main(args, device, class_list):
     f = open(os.path.join(args.result, 'log.txt'), 'w')
     f.write('=' * 40)
     f.write('Arguments')
@@ -43,13 +43,10 @@ def main(args, device):
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, drop_last=True, num_workers=8)
     val_dataloader = DataLoader(val_dataset)
-    class_list = ['void', 'sky', 'building', 'road', 'sidewalk', 'fence', 'vegetation', 'pole', 'car', 'traffic sign',
-                  'pedestrian', 'bicycle', 'motorcycle', 'parking-slot', 'road-work', 'traffic light', 'terrain',
-                  'rider', 'truck', 'bus', 'train', 'wall', 'lanemarking']
+
 
     max_miou = 0
     total_train_loss = []
-    class_index = []
     for epoch in range(args.epochs):
         if args.resume != 0:
             epoch += args.resume
@@ -64,7 +61,6 @@ def main(args, device):
             img = torch.cat((img, img2), dim=1)
 
             mask = batch[0][2].squeeze(1).to(device)
-            class_index.append([k for k in np.unique(mask.detach().cpu().numpy())])
             img_name = batch[1][0]
             pred = model(img.to(device))['out']
 
@@ -195,7 +191,6 @@ def main(args, device):
 
         total_train_loss.append(train_loss)
         print('{} epoch, mean train loss: {}'.format(epoch, total_train_loss[-1]))
-        print(np.unique(np.array(class_index)))
 
         # if epoch % 5 == 0:
         #     save_checkpoint(os.path.join(args.result, 'model', str(epoch) + '_model.pth'), sam_model, epoch)
@@ -203,7 +198,8 @@ def main(args, device):
         if epoch >= args.start_val:
             model.eval()
             mean_iou = 0
-            hist = np.zeros((args.num_classes, args.num_classes))
+            hist = np.zeros((args.num_classes+1, args.num_classes+1))
+            ave_mIOUs = []
 
             with torch.no_grad():
                 for iter, batch in enumerate(val_dataloader):
@@ -216,13 +212,11 @@ def main(args, device):
                     pred = model(img.to(device))['out']
                     pred = torch.argmax(pred, dim=1)
                     pred = pred[0].detach().cpu().numpy()
-                    print(mask.shape, pred.shape)
 
                     hist += fast_hist(mask.numpy().flatten(), pred.flatten(), args.num_classes)
-                    print('{:s}: {:0.2f}'.format(img_name, 100 * np.nanmean(per_class_iu(hist))))
 
                     mIoUs = per_class_iu(hist)
-                    print(mIoUs)
+                    ave_mIOUs.append(mIoUs)
 
                     pred = mk_colored(pred) * 255
                     pred = Image.fromarray((pred).astype(np.uint8))
@@ -232,24 +226,19 @@ def main(args, device):
                     mask = Image.fromarray((mask).astype(np.uint8))
                     mask.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_mask.png'))
 
+                ave_mIOUs = np.sum(np.array(ave_mIOUs), axis=0)
                 f = open(os.path.join(args.result, 'img', str(epoch), "result.txt"), 'w')
-                f.write('***test result_mask*** Average- Dice\tIOU\tAJI: '
-                        '\t\t{:.4f}\t{:.4f}\t{:.4f}'.format(mean_dice, mean_iou, mean_aji))
+                f.write('***test result_mask*** class_name\t{:s}'.format('\t'.join(class_list)))
+                f.write('***test result_mask*** mIOU\t{:s}'.format('\t'.join(ave_mIOUs.tolist())))
+                f.write('***test result_mask*** ave mIOU\t{:s}'.format(str(np.sum(ave_mIOUs))))
                 f.close()
 
-                if max_Dice < mean_dice:
-                    print('save {} epoch!!--Dice: {}'.format(str(epoch), mean_dice))
-                    save_checkpoint(os.path.join(args.result, 'model', 'Dice_best_model.pth'), sam_model, epoch)
-                    max_Dice = mean_dice
+                if max_miou < np.sum(ave_mIOUs):
+                    print('save {} epoch!!--ave mIOU: {}'.format(str(epoch), np.sum(ave_mIOUs)))
+                    save_checkpoint(os.path.join(args.result, 'model', 'Dice_best_model.pth'), model, epoch)
+                    max_miou = np.sum(ave_mIOUs)
 
-                if max_Aji < mean_aji:
-                    print('save {} epoch!!--Aji: {}'.format(str(epoch), mean_aji))
-                    save_checkpoint(os.path.join(args.result, 'model', 'Aji_best_model.pth'), sam_model, epoch)
-                    max_Aji = mean_aji
-
-                print(epoch, ': Average- Dice\tIOU\tAJI: '
-                             '\t\t{:.4f}\t{:.4f}\t{:.4f} (b Dice: {}, b Aji: {})'.format(mean_dice, mean_iou,
-                                                                                         mean_aji, max_Dice, max_Aji))
+                print(epoch, ': ave mIOU\t{:s}'.format(str(np.sum(ave_mIOUs))))
 
 
 def test(args, device):
@@ -438,6 +427,10 @@ if __name__ == '__main__':
     if args.model_type == 'deeplabv3_resnet50':
         args.model_path = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/best_deeplabv3_resnet50_voc_os16.pth'
 
+    class_list = ['void', 'sky', 'building', 'road', 'sidewalk', 'fence', 'vegetation', 'pole', 'car', 'traffic sign',
+                  'pedestrian', 'bicycle', 'motorcycle', 'parking-slot', 'road-work', 'traffic light', 'terrain',
+                  'rider', 'truck', 'bus', 'train', 'wall', 'lanemarking']
+
     print('=' * 40)
     print(' ' * 14 + 'Arguments')
     for arg in sorted(vars(args)):
@@ -452,7 +445,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
     if args.train==True:
-        main(args, device)
+        main(args, device, class_list)
     if args.test==True:
         test(args, device)
 
