@@ -217,7 +217,6 @@ def main(args, device, class_list):
 
                     mIoUs = per_class_iu(hist)
                     ave_mIOUs.append(mIoUs)
-                    print(np.array(ave_mIOUs).shape, np.mean(ave_mIOUs, axis=0).shape)
 
                     pred = mk_colored(pred) * 255
                     pred = Image.fromarray((pred).astype(np.uint8))
@@ -234,12 +233,12 @@ def main(args, device, class_list):
                 f.write('***test result_mask*** ave mIOU\t{:s}'.format(str(np.nanmean(ave_mIOUs))))
                 f.close()
 
-                if max_miou < np.sum(ave_mIOUs):
+                if max_miou < np.nanmean(ave_mIOUs):
                     print('save {} epoch!!--ave mIOU: {}'.format(str(epoch), np.sum(ave_mIOUs)))
                     save_checkpoint(os.path.join(args.result, 'model', 'Dice_best_model.pth'), model, epoch)
-                    max_miou = np.sum(ave_mIOUs)
+                    max_miou = np.nanmean(ave_mIOUs)
 
-                print(epoch, ': ave mIOU\t{:s}'.format(str(np.sum(ave_mIOUs))))
+                print(epoch, ': ave mIOU\t{:s}'.format(str(np.nanmean(ave_mIOUs))))
 
 
 def test(args, device):
