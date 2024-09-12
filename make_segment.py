@@ -46,6 +46,9 @@ def make_split(data_root, save_root):
     with open('{:s}/train_val_test.json'.format(save_root), 'w') as make_file:
         json.dump(json_data, make_file, indent='\t')
 def main(data_root, save_root):
+    # img_folder = 'RGB'
+    img_folder = 'images/train'
+
     # select the device for computation
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -91,10 +94,10 @@ def main(data_root, save_root):
         use_m2m=True,
     )
 
-    img_list = os.listdir(os.path.join(data_root, 'RGB'))
+    img_list = os.listdir(os.path.join(data_root, img_folder))
     for img_name in img_list:
         print(img_name, '...')
-        img_path = os.path.join(data_root, 'RGB', img_name)
+        img_path = os.path.join(data_root, img_folder, img_name)
         img = np.array(Image.open(img_path).convert('RGB'))
         mask = mask_generator.generate(img)
         img, mask = show_anns(mask)
