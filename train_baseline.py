@@ -8,9 +8,19 @@ from torch.utils.data import DataLoader
 from Datasets.synthia_dataset import synthia_dataset
 from SS_model.deeplab_v3 import modeling
 
-from utils.utils import mk_colored, save_checkpoint
+from utils.utils import colorEncode, save_checkpoint
 from utils.compute_iou import DiceLoss, fast_hist, per_class_iu
 
+import csv
+from scipy.io import loadmat
+
+colors = loadmat('data/color150.mat')['colors']
+names = {}
+with open('data/object150_info.csv') as f:
+    reader = csv.reader(f)
+    next(reader)
+    for row in reader:
+        names[int(row[0])] = row[5].split(";")[0]
 
 def main(args, device, class_list):
     f = open(os.path.join(args.result, 'log.txt'), 'w')
@@ -221,11 +231,11 @@ def main(args, device, class_list):
                     mIoUs = per_class_iu(hist)
                     ave_mIOUs.append(mIoUs)
 
-                    pred = mk_colored(pred) * 255
+                    pred = colorEncode(pred, colors).astype(np.uint8)
                     pred = Image.fromarray((pred).astype(np.uint8))
                     pred.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_pred.png'))
 
-                    mask = mk_colored(mask.detach().cpu().numpy()) * 255
+                    mask = colorEncode(mask.detach().cpu().numpy(), colors).astype(np.uint8)
                     mask = Image.fromarray((mask).astype(np.uint8))
                     mask.save(os.path.join(args.result, 'img', str(epoch), str(img_name) + '_mask.png'))
 

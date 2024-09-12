@@ -30,7 +30,8 @@ def show_anns(anns, borders=True):
     return img, mask
 
 def make_split(data_root, save_root):
-    img_list = os.listdir(os.path.join(data_root, 'RGB'))
+    # img_list = os.listdir(os.path.join(data_root, 'RGB'))
+    img_list = os.listdir(os.path.join(data_root, 'train'))
     random.shuffle(img_list)
 
     train_list = img_list[:int(len(img_list)*0.5)]
@@ -106,8 +107,10 @@ def main(data_root, save_root):
 
 
 if __name__ == '__main__':
-    data_root = '/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES'
-    save_root = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/synthia'
+    # data_root = '/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES'
+    # save_root = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/synthia'
+    data_root = '/media/NAS/nas_70/open_dataset/CoNSeP/CoNSeP/via instance learning data_for_train/CoNSeP'
+    save_root = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/CoNSeP'
     make_split(data_root, save_root)
     main(data_root, save_root)
 
