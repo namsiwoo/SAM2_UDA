@@ -31,7 +31,7 @@ def show_anns(anns, borders=True):
 
 def make_split(data_root, save_root):
     # img_list = os.listdir(os.path.join(data_root, 'RGB'))
-    img_list = os.listdir(os.path.join(data_root, 'train'))
+    img_list = os.listdir(os.path.join(data_root, 'images/train'))
     random.shuffle(img_list)
 
     train_list = img_list[:int(len(img_list)*0.5)]
