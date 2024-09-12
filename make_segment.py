@@ -111,7 +111,7 @@ if __name__ == '__main__':
     # save_root = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/synthia'
     data_root = '/media/NAS/nas_70/open_dataset/CoNSeP/CoNSeP/via instance learning data_for_train/CoNSeP'
     save_root = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/CoNSeP'
-    make_split(data_root, save_root)
+    # make_split(data_root, save_root)
     main(data_root, save_root)
 
     #CUDA_VISIBLE_DEVICES=0 python make_segment.py
