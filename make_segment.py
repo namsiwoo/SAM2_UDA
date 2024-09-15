@@ -112,8 +112,8 @@ def main(data_root, save_root):
 if __name__ == '__main__':
     # data_root = '/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES'
     # save_root = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/synthia'
-    data_root = '/media/NAS/nas_70/open_dataset/CoNSeP/CoNSeP/via instance learning data_for_train/CoNSeP'
-    save_root = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/CoNSeP'
+    data_root = '/media/NAS/nas_70/open_dataset/TNBC/TNBC/via instance learning data_for_train/TNBC'
+    save_root = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/TNBC'
     # make_split(data_root, save_root)
     main(data_root, save_root)
 

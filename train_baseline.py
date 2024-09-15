@@ -257,41 +257,22 @@ def main(args, device, class_list):
 def test(args, device):
     # device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
+    import torch
     device = torch.device(
         "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
-    # sam_model = sam_model_registry[args.model_type](checkpoint=args.sam_checkpoint)
-    # sam_model = sam_model.to(device)
 
-    # adapter
-    if args.model_type == 'vit_h':
-        encoder_mode = {'name': 'sam', 'img_size': args.img_size, 'mlp_ratio': 4, 'patch_size': 16, 'qkv_bias': True, 'use_rel_pos': True, 'window_size': 14, 'out_chans': 256, 'scale_factor': 32, 'input_type': 'fft',
-                        'freq_nums': 0.25, 'prompt_type': 'highpass', 'prompt_embed_dim': 256, 'tuning_stage': 1234, 'handcrafted_tune': True, 'embedding_tune': True, 'adaptor': 'adaptor', 'embed_dim': 1280,
-                        'depth': 32, 'num_heads': 16, 'global_attn_indexes': [7, 15, 23, 31]}
-    elif args.model_type == 'vit_l':
-        encoder_mode = {'name': 'sam', 'img_size': args.img_size, 'mlp_ratio': 4, 'patch_size': 16, 'qkv_bias': True, 'use_rel_pos': True, 'window_size': 14, 'out_chans': 256, 'scale_factor': 32, 'input_type': 'fft',
-                        'freq_nums': 0.25, 'prompt_type': 'highpass', 'prompt_embed_dim': 256, 'tuning_stage': 1234, 'handcrafted_tune': True, 'embedding_tune': True, 'adaptor': 'adaptor', 'embed_dim': 1024,
-                        'depth': 24, 'num_heads': 16, 'global_attn_indexes': [5, 11, 17, 23]}
-    elif args.model_type == 'vit_b':
-        encoder_mode = {'name': 'sam', 'img_size': args.img_size, 'mlp_ratio': 4, 'patch_size': 16, 'qkv_bias': True,
-                        'use_rel_pos': True, 'window_size': 14, 'out_chans': 256, 'scale_factor': 32,
-                        'input_type': 'fft',
-                        'freq_nums': 0.25, 'prompt_type': 'highpass', 'prompt_embed_dim': 256, 'tuning_stage': 1234,
-                        'handcrafted_tune': True, 'embedding_tune': True, 'adaptor': 'adaptor', 'embed_dim': 768,
-                        'depth': 12, 'num_heads': 12, 'global_attn_indexes': [2, 5, 8, 11]}
-        sam_checkpiont = 'sam_vit_b_01ec64.pth'
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
 
-    sam_model = models.sam_DA.SAM(inp_size=1024, encoder_mode=encoder_mode, loss='iou', device=device)
+    input_channel = 3
+    if args.use_sam == True:
+        input_channel = 6
+    model.backbone.conv1 = nn.Conv2d(input_channel, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+    model.classifier[-1] = nn.Conv2d(256, args.num_classes + 1, kernel_size=(1, 1), stride=(1, 1))
+    # model.aux_classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
+    model = model.to(device)
 
-    sam_model.make_HQ_model(model_type=args.model_type, num_token=args.num_hq_token)
-    sam_model = sam_model.cuda()
-
-    # sam_checkpoint = torch.load(os.path.join(args.model, 'Aji_best_model.pth'))
-    # sam_model.load_state_dict(sam_checkpoint, strict=False)
-    sam_model = load_checkpoint(sam_model, os.path.join(args.result, 'model', 'Aji_best_model.pth'))
-    # sam_model = load_checkpoint(sam_model, os.path.join(args.model, 'Dice_best_model.pth'))
-
-    test_dataseet = DA_dataset(args, 'test', use_mask=args.sup, data=(args.data1, args.data2), train_IHC=args.train_IHC)
+    test_dataseet = synthia_dataset(args, 'train')
 
     test_dataloader = DataLoader(test_dataseet)
     if args.test_name == "None":
@@ -300,82 +281,45 @@ def test(args, device):
         args.test_name = 'test_'+args.test_name
 
     os.makedirs(os.path.join(args.result, 'img',args.test_name), exist_ok=True)
-    sam_model.eval()
-    mean_dice, mean_iou, mean_aji = 0, 0, 0
-    mean_dq, mean_sq, mean_pq = 0, 0, 0
-    mean_ap1, mean_ap2, mean_ap3 = 0, 0, 0
-    # if torch.distributed.get_rank() == 0:
+    model.eval()
+
+    hist = np.zeros((args.num_classes + 1, args.num_classes + 1))
+    ave_mIOUs = []
 
     with torch.no_grad():
-        for iter, pack in enumerate(test_dataloader):
-            input = pack[0][0]
-            mask = pack[0][1]
-            size = 224
+        for iter, batch in enumerate(test_dataloader):
+            img = batch[0][0]
+            if args.use_sam == True:
+                img2 = batch[0][1]
+                img = torch.cat((img, img2), dim=1)
 
-            img_name = pack[1][0]
-            print(img_name, 'is processing....')
+            mask = batch[0][2].squeeze(1).to(device)
+            img_name = batch[1][0]
+            pred = model(img.to(device))['out']
+            pred = torch.argmax(pred, dim=1)
+            pred = pred[0].detach().cpu().numpy()
 
-            output, output_offset = split_forward(sam_model, input, args.img_size, device, args.num_hq_token, size)
-            binary_mask = torch.sigmoid(output).detach().cpu().numpy()
+            hist += fast_hist(mask.numpy().flatten(), pred.flatten(), args.num_classes + 1)
 
-            if args.num_hq_token == 2:
-                pred_flow_vis = flow_to_color(output_offset[0].detach().cpu().numpy().transpose(1, 2, 0))
-                binary_map, instance_map, marker = make_instance_hv(binary_mask[0][0],
-                                                                    output_offset[0].detach().cpu().numpy())
-            elif args.num_hq_token == 1:
-                pred_flow_vis = output_offset[0][1].detach().cpu().numpy() * 255
-                binary_map, instance_map, marker = make_instance_marker(binary_mask[0][0], output_offset[0][
-                    1].detach().cpu().numpy(), args.ord_th)
-            else:
-                bg = torch.zeros(1, 1, 1000, 1000) + args.ord_th  # K 0.15
-                bg = bg.to(device)
-                output_offset = torch.argmax(torch.cat([bg, output_offset], dim=1), dim=1)
-                pred_flow_vis = ((output_offset[0].detach().cpu().numpy() * 255) / 9).astype(np.uint8)
-                binary_map, instance_map, marker = make_instance_sonnet(binary_mask[0][0],
-                                                                        output_offset[0].detach().cpu().numpy())
+            mIoUs = per_class_iu(hist)
+            ave_mIOUs.append(mIoUs)
 
-            if len(np.unique(binary_map)) == 1:
-                dice, iou, aji = 0, 0, 0
-                pq_list = [0, 0, 0]
-                ap = [0, 0, 0]
-            else:
-                dice, iou = accuracy_object_level(instance_map, mask[0][0].detach().cpu().numpy())
-                aji = AJI_fast(mask[0][0].detach().cpu().numpy(), instance_map, img_name)
-                pq_list, _ = get_fast_pq(mask[0][0].detach().cpu().numpy(), instance_map) #[dq, sq, dq * sq], [paired_true, paired_pred, unpaired_true, unpaired_pred]
-                # ap, _, _, _ = average_precision(mask[0][0].detach().cpu().numpy(), instance_map)
-
-            mean_dice += dice / (len(test_dataloader))  # *len(local_rank))
-            mean_iou += iou / (len(test_dataloader))  # len(local_rank))
-            mean_aji += aji / (len(test_dataloader))
-
-            mean_dq += pq_list[0] / (len(test_dataloader))  # *len(local_rank))
-            mean_sq += pq_list[1] / (len(test_dataloader))  # len(local_rank))
-            mean_pq += pq_list[2] / (len(test_dataloader))
-
-            # mean_ap1 += ap[0] / (len(test_dataloader))
-            # mean_ap2 += ap[1] / (len(test_dataloader))
-            # mean_ap3 += ap[2] / (len(test_dataloader))
-
-            instance_map = mk_colored(instance_map) * 255
-            instance_map = Image.fromarray((instance_map).astype(np.uint8))
-            instance_map.save(os.path.join(args.result, 'img', args.test_name, str(img_name) + '_pred_inst.png'))
-
-            marker = mk_colored(marker) * 255
-            marker = Image.fromarray((marker).astype(np.uint8))
-            marker.save(os.path.join(args.result, 'img', args.test_name, str(img_name) + '_marker.png'))
-
-            pred = mk_colored(binary_map) * 255
+            pred = colorEncode(pred, colors).astype(np.uint8)
             pred = Image.fromarray((pred).astype(np.uint8))
             pred.save(os.path.join(args.result, 'img', args.test_name, str(img_name) + '_pred.png'))
 
-            pred_flow_vis = Image.fromarray(pred_flow_vis.astype(np.uint8))
-            pred_flow_vis.save(os.path.join(args.result, 'img', args.test_name, str(img_name) + '_flow_vis.png'))
-
-            mask = mk_colored(mask[0][0].detach().cpu().numpy()) * 255
+            mask = colorEncode(mask.detach().cpu().numpy(), colors).astype(np.uint8)
             mask = Image.fromarray((mask).astype(np.uint8))
             mask.save(os.path.join(args.result, 'img', args.test_name, str(img_name) + '_mask.png'))
 
+    ave_mIOUs = np.mean(np.array(ave_mIOUs), axis=0)
+    f = open(os.path.join(args.result, 'img', args.test_name, "result.txt"), 'w')
+    f.write('***test result_mask*** class_name\t{:s}\n'.format('\t'.join(class_list)))
+    f.write('***test result_mask*** mIOU\t{:s}\n'.format('\t'.join(map(str, ave_mIOUs.tolist()))))
+    f.write('***test result_mask*** ave mIOU\t{:s}\n'.format(str(np.nanmean(ave_mIOUs))))
+    f.close()
 
+    print(epoch, ': ave mIOU\t{:s} (b mIOU: {}'.format(str(np.nanmean(ave_mIOUs)), max_miou))
 
     print('test result: Average- Dice\tIOU\tAJI: '
                  '\t\t{:.4f}\t{:.4f}\t{:.4f}'.format(mean_dice, mean_iou, mean_aji))
