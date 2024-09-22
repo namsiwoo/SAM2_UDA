@@ -6,7 +6,7 @@
 
 import logging
 
-import torch
+import torch, hydra
 from hydra import compose
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
@@ -31,6 +31,7 @@ def build_sam2(
             "++model.sam_mask_decoder_extra_args.dynamic_multimask_stability_thresh=0.98",
         ]
     # Read config and init model
+    hydra.initialize_config_module(config_file, version_base='1.2')
     cfg = compose(config_name=config_file, overrides=hydra_overrides_extra)
     OmegaConf.resolve(cfg)
     model = instantiate(cfg.model, _recursive_=True)
