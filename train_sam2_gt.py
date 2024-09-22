@@ -39,7 +39,7 @@ def main(args, device, class_list):
 
     sam2_model = build_sam2(model_cfg, sam2_checkpoint, device="cuda")  # load model
     predictor = SAM2ImagePredictor(sam2_model)
-    predictor.model.sam_mask_decoder.train(True)
+    predictor.model.sam_mask_decoder_ssm.train(True)
 
 
     optimizer = torch.optim.AdamW(params=predictor.model.parameters(), lr=1e-5, weight_decay=4e-5)

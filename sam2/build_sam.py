@@ -121,7 +121,6 @@ def build_sam2_video_predictor_hf(model_id, **kwargs):
 def _load_checkpoint(model, ckpt_path):
     if ckpt_path is not None:
         sd = torch.load(ckpt_path, map_location="cpu")["model"]
-        print(sd)
         model.load_state_dict(sd, strict=False)
         # missing_keys, unexpected_keys = model.load_state_dict(sd, strict=False)
         # if missing_keys:
