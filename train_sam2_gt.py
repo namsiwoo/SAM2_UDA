@@ -34,7 +34,8 @@ def main(args, device, class_list):
     import torch
 
     sam2_checkpoint = "/media/NAS/nas_70/siwoo_data/UDA_citycapes/sam2_hiera_large.pt"
-    model_cfg = "sam2_hiera_l_ssm.yaml"
+    # model_cfg = "sam2_hiera_l_ssm.yaml"
+    model_cfg = "sam2_hiera_l.yaml"
 
     sam2_model = build_sam2(model_cfg, sam2_checkpoint, device="cuda")  # load model
     predictor = SAM2ImagePredictor(sam2_model)
