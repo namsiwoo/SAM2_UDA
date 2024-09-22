@@ -35,7 +35,9 @@ def main(args, device, class_list):
 
     sam2_checkpoint = "sam2_hiera_small.pt"  # path to model weight
     from hydra import compose
+    from omegaconf import OmegaConf
     model_cfg = compose(config_name="sam2_hiera_s.yaml")
+    OmegaConf.resolve(model_cfg)
 
     sam2_model = SAM2Base(model_cfg.model)
     predictor = SAM2ImagePredictor(sam2_model)
