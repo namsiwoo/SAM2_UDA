@@ -12,7 +12,7 @@ from torch import nn
 from sam2.modeling.sam2_utils import LayerNorm2d, MLP
 
 
-class MaskDecoder(nn.Module):
+class MaskDecoder_ssm(nn.Module):
     def __init__(
         self,
         *,

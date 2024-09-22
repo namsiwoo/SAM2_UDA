@@ -10,7 +10,7 @@ import torch.nn.functional as F
 
 from torch.nn.init import trunc_normal_
 
-from sam2.modeling.sam.mask_decoder_ssm import MaskDecoder
+from sam2.modeling.sam.mask_decoder_ssm import MaskDecoder_ssm
 from sam2.modeling.sam.prompt_encoder import PromptEncoder
 from sam2.modeling.sam.transformer import TwoWayTransformer
 from sam2.modeling.sam2_utils import get_1d_sine_pe, MLP, select_closest_cond_frames
@@ -217,7 +217,7 @@ class SAM2Base(torch.nn.Module):
             input_image_size=(self.image_size, self.image_size),
             mask_in_chans=16,
         )
-        self.sam_mask_decoder = MaskDecoder(
+        self.sam_mask_decoder_ssm = MaskDecoder_ssm(
             num_multimask_outputs=3,
             transformer=TwoWayTransformer(
                 depth=2,
@@ -345,7 +345,7 @@ class SAM2Base(torch.nn.Module):
             ious,
             sam_output_tokens,
             object_score_logits,
-        ) = self.sam_mask_decoder(
+        ) = self.sam_mask_decoder_ssm(
             image_embeddings=backbone_features,
             image_pe=self.sam_prompt_encoder.get_dense_pe(),
             sparse_prompt_embeddings=sparse_embeddings,
@@ -470,10 +470,10 @@ class SAM2Base(torch.nn.Module):
         if self.use_high_res_features_in_sam:
             # precompute projected level 0 and level 1 features in SAM decoder
             # to avoid running it again on every SAM click
-            backbone_out["backbone_fpn"][0] = self.sam_mask_decoder.conv_s0(
+            backbone_out["backbone_fpn"][0] = self.sam_mask_decoder_ssm.conv_s0(
                 backbone_out["backbone_fpn"][0]
             )
-            backbone_out["backbone_fpn"][1] = self.sam_mask_decoder.conv_s1(
+            backbone_out["backbone_fpn"][1] = self.sam_mask_decoder_ssm.conv_s1(
                 backbone_out["backbone_fpn"][1]
             )
         return backbone_out
