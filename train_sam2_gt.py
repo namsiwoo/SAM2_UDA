@@ -16,12 +16,12 @@ import csv
 from scipy.io import loadmat
 
 colors = loadmat('/media/NAS/nas_70/siwoo_data/UDA_citycapes/color150.mat')['colors']
-names = {}
-with open('data/object150_info.csv') as f:
-    reader = csv.reader(f)
-    next(reader)
-    for row in reader:
-        names[int(row[0])] = row[5].split(";")[0]
+# names = {}
+# with open('data/object150_info.csv') as f:
+#     reader = csv.reader(f)
+#     next(reader)
+#     for row in reader:
+#         names[int(row[0])] = row[5].split(";")[0]
 
 def main(args, device, class_list):
     f = open(os.path.join(args.result, 'log.txt'), 'w')
