@@ -34,9 +34,10 @@ def main(args, device, class_list):
     import torch
 
     sam2_checkpoint = "sam2_hiera_small.pt"  # path to model weight
-    model_cfg = "sam2_hiera_s.yaml"  # model config
+    from hydra import compose
+    model_cfg = compose(config_name="sam2_hiera_s.yaml")
 
-    sam2_model = SAM2Base(model_cfg)
+    sam2_model = SAM2Base(model_cfg.model)
     predictor = SAM2ImagePredictor(sam2_model)
     predictor.model.sam_mask_decoder.train(True)
 
