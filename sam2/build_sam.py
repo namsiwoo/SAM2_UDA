@@ -159,6 +159,7 @@ def load_checkpoint(model, model_path):
     # check loaded parameters and created model parameters
     for k in state_dict:
         if k in model_state_dict:
+            print('load {}'.format(k))
             if state_dict[k].shape != model_state_dict[k].shape:
                 try:
                     tmp = torch.zeros(model_state_dict[k].shape)  # create tensor with zero filled
