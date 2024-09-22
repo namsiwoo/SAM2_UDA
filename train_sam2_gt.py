@@ -38,7 +38,7 @@ def main(args, device, class_list):
 
     with open("sam2_configs/sam2_hiera_s.yaml", "r") as f:
         model_cfg = yaml.safe_load(f)
-
+    print(model_cfg)
     sam2_model = SAM2Base(model_cfg['model'])
     predictor = SAM2ImagePredictor(sam2_model)
     predictor.model.sam_mask_decoder.train(True)
