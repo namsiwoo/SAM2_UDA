@@ -6,7 +6,7 @@ import numpy as np
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from Datasets.synthia_dataset import synthia_dataset
-from sam2.modeling.sam2_ssm import SAM2Base
+from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
 from utils.utils import colorEncode, save_checkpoint
@@ -34,15 +34,9 @@ def main(args, device, class_list):
     import torch
 
     sam2_checkpoint = "sam2_hiera_small.pt"  # path to model weight
-    model_cfg = yaml.load("sam2_hiera_s.yaml", Loader=yaml.FullLoader)
+    model_cfg = "sam2_configs/sam2_hiera_s.yaml"
 
-    with open("sam2_configs/sam2_hiera_s.yaml", "r") as f:
-        model_cfg = yaml.safe_load(f)
-    from omegaconf import OmegaConf
-    OmegaConf.resolve(model_cfg)
-    print(model_cfg)
-    print(model_cfg['model'])
-    sam2_model = SAM2Base(model_cfg['model'])
+    sam2_model = build_sam2(model_cfg, sam2_checkpoint, device="cuda")  # load model
     predictor = SAM2ImagePredictor(sam2_model)
     predictor.model.sam_mask_decoder.train(True)
 
