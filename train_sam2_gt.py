@@ -35,7 +35,7 @@ def main(args, device, class_list):
 
     sam2_checkpoint = "sam2_hiera_small.pt"  # path to model weight
     model_cfg = yaml.load("sam2_hiera_s.yaml", Loader=yaml.FullLoader)
-    sam2_model = SAM2Base(model_cfg.model)
+    sam2_model = SAM2Base(model_cfg['model'])
     predictor = SAM2ImagePredictor(sam2_model)
     predictor.model.sam_mask_decoder.train(True)
 
