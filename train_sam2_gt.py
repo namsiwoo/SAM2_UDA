@@ -32,7 +32,6 @@ def main(args, device, class_list):
 
 
     import torch
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
 
     sam2_checkpoint = "sam2_hiera_small.pt"  # path to model weight
     model_cfg = "sam2_hiera_s.yaml"  # model config
@@ -41,7 +40,7 @@ def main(args, device, class_list):
     predictor = SAM2ImagePredictor(sam2_model)
     predictor.model.sam_mask_decoder.train(True)
 
-    model = model.to(device)
+    predictor = predictor.to(device)
 
     optimizer = torch.optim.AdamW(params=predictor.model.parameters(), lr=1e-5, weight_decay=4e-5)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
