@@ -34,14 +34,13 @@ def main(args, device, class_list):
     import torch
 
     sam2_checkpoint = "sam2_hiera_small.pt"  # path to model weight
-    model_cfg = "sam2_configs/sam2_hiera_s_ssm.yaml"
-    model_cfg = "sam2_configs/sam2_hiera_s.yaml"
+    # model_cfg = "sam2_configs/sam2_hiera_s_ssm.yaml"
+    model_cfg = "sam2_hiera_s.yaml"
 
     sam2_model = build_sam2(model_cfg, sam2_checkpoint, device="cuda")  # load model
     predictor = SAM2ImagePredictor(sam2_model)
     predictor.model.sam_mask_decoder.train(True)
 
-    predictor = predictor.to(device)
 
     optimizer = torch.optim.AdamW(params=predictor.model.parameters(), lr=1e-5, weight_decay=4e-5)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
