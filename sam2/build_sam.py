@@ -30,8 +30,11 @@ def build_sam2(
             "++model.sam_mask_decoder_extra_args.dynamic_multimask_stability_delta=0.05",
             "++model.sam_mask_decoder_extra_args.dynamic_multimask_stability_thresh=0.98",
         ]
-    # Read config and init model
+
+    hydra.core.global_hydra.GlobalHydra.instance().clear()
     hydra.initialize_config_module(config_file, version_base='1.2')
+
+    # Read config and init model
     cfg = compose(config_name=config_file, overrides=hydra_overrides_extra)
     OmegaConf.resolve(cfg)
     model = instantiate(cfg.model, _recursive_=True)
