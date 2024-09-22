@@ -38,6 +38,8 @@ def main(args, device, class_list):
 
     with open("sam2_configs/sam2_hiera_s.yaml", "r") as f:
         model_cfg = yaml.safe_load(f)
+    from omegaconf import OmegaConf
+    OmegaConf.resolve(model_cfg)
     print(model_cfg)
     print(model_cfg['model'])
     sam2_model = SAM2Base(model_cfg['model'])
