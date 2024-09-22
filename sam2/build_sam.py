@@ -35,7 +35,8 @@ def build_sam2(
     cfg = compose(config_name=config_file, overrides=hydra_overrides_extra)
     OmegaConf.resolve(cfg)
     model = instantiate(cfg.model, _recursive_=True)
-    _load_checkpoint(model, ckpt_path)
+    # _load_checkpoint(model, ckpt_path)
+    model = load_checkpoint(model, ckpt_path)
     model = model.to(device)
     if mode == "eval":
         model.eval()
@@ -129,3 +130,53 @@ def _load_checkpoint(model, ckpt_path):
         #     logging.error(unexpected_keys)
         #     raise RuntimeError()
         # logging.info("Loaded checkpoint sucessfully")
+
+def load_checkpoint(model, model_path):
+    if not os.path.isfile(model_path):
+        raise ValueError('Invalid checkpoint file: {}'.format(model_path))
+
+    checkpoint = torch.load(model_path, map_location=lambda storage, loc: storage)
+    try:
+        epoch = checkpoint['epoch']
+        tmp_state_dict = checkpoint['state_dict']
+        print('loaded {}, epoch {}'.format(model_path, epoch))
+    except:
+        # The most naive way for serialization (especially for efficientdet)
+        tmp_state_dict = checkpoint
+
+    # create state_dict
+    state_dict = {}
+
+    # convert data_parallal to model
+    for k in tmp_state_dict:
+        if k.startswith('module') and not k.startswith('module_list'):
+            state_dict[k[7:]] = tmp_state_dict[k]
+        else:
+            state_dict[k] = tmp_state_dict[k]
+
+    model_state_dict = model.state_dict()
+
+    # check loaded parameters and created model parameters
+    for k in state_dict:
+        if k in model_state_dict:
+            if state_dict[k].shape != model_state_dict[k].shape:
+                try:
+                    tmp = torch.zeros(model_state_dict[k].shape)  # create tensor with zero filled
+                    tmp[:state_dict[k].shape[0]] = state_dict[k]  # fill valid
+                    state_dict[k] = tmp
+                    print('Load parameter partially {}, required shape {}, loaded shape {}'.format(k, model_state_dict[k].shape, state_dict[k].shape))
+                except:
+                    print('Remain parameter (as random) {}'.format(k))  # when loaded state_dict has larger tensor
+                    state_dict[k] = model_state_dict[k]
+        else:
+            print('Drop parameter {}'.format(k))
+
+    for k in model_state_dict:
+        if not (k in state_dict):
+            print('No param {}'.format(k))
+            state_dict[k] = model_state_dict[k]
+
+    # load state_dict
+    model.load_state_dict(state_dict, strict=False)
+
+    return model
