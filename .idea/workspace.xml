@@ -5,8 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="adce4353-c36f-4d6a-ad46-49a92f4a38e5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Datasets/cityscapes_dataset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sam2/modeling/sam/mask_decoder_ssm.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sam2/modeling/sam2_ssm.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/train_sam2_gt.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_baseline.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_baseline.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +48,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\siwoo\PycharmProjects\SAM2_UDA\sam2\modeling" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -66,6 +74,14 @@
       <workItem from="1725738034111" duration="13961000" />
       <workItem from="1725914086030" duration="14376000" />
       <workItem from="1726077675957" duration="16157000" />
+      <workItem from="1726361317483" duration="1775000" />
+      <workItem from="1726370120286" duration="1246000" />
+      <workItem from="1726407069179" duration="616000" />
+      <workItem from="1726468125116" duration="490000" />
+      <workItem from="1726583173098" duration="6765000" />
+      <workItem from="1726806230036" duration="46000" />
+      <workItem from="1726963445160" duration="2424000" />
+      <workItem from="1726976686405" duration="5133000" />
     </task>
     <servers />
   </component>
