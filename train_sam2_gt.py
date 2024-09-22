@@ -1,5 +1,5 @@
 import torch
-import os, random, gc
+import os, random, gc, yaml
 import argparse
 from PIL import Image
 import numpy as np
@@ -34,11 +34,7 @@ def main(args, device, class_list):
     import torch
 
     sam2_checkpoint = "sam2_hiera_small.pt"  # path to model weight
-    from hydra import compose
-    from omegaconf import OmegaConf
-    model_cfg = compose(config_name="sam2_hiera_s.yaml")
-    OmegaConf.resolve(model_cfg)
-
+    model_cfg = yaml.load("sam2_hiera_s.yaml")
     sam2_model = SAM2Base(model_cfg.model)
     predictor = SAM2ImagePredictor(sam2_model)
     predictor.model.sam_mask_decoder.train(True)
