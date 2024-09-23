@@ -10,7 +10,7 @@ from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
 from utils.utils import colorEncode, save_checkpoint
-from utils.compute_iou import DiceLoss, fast_hist, per_class_iu
+from utils.compute_iou import SoftDiceLoss, fast_hist, per_class_iu
 
 import csv
 from scipy.io import loadmat
@@ -46,7 +46,7 @@ def main(args, device, class_list):
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
     scaler = torch.cuda.amp.GradScaler()  # set mixed precision
 
-    criterion_dice = DiceLoss()
+    criterion_dice = SoftDiceLoss()
     criterion_ce = torch.nn.CrossEntropyLoss()
 
     train_dataset = cityscapes_dataset(args, 'train')
