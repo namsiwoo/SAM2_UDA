@@ -56,7 +56,7 @@ def main(args, device, class_list):
         for iter, batch in enumerate(train_dataloader): # batch[0]
             with torch.cuda.amp.autocast():  # cast to mix precision
                 img = batch[0][0]
-                mask = batch[0][2].squeeze(1).to(device)
+                mask = batch[0][1].squeeze(1).to(device)
                 input_point = None
                 input_label = None
                 # image, mask, input_point, input_label = read_batch(data)  # load data batch
