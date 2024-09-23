@@ -394,8 +394,8 @@ if __name__ == '__main__':
     parser.add_argument('--model_type', default='deeplabv3_resnet50', help='')
     # parser.add_argument('--img_dir',default='/media/NAS/nas_187/datasets/Cityscapes-Seq/leftImg8bit_sequence_trainvaltest/leftImg8bit_sequence',help='')
     # parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES/GT/LABELS')
-    parser.add_argument('--img_dir',default='/media/NAS/nas_187/datasets/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train',help='')
-    parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/cityscapes/gtFine_trainvaltest/gtFine/train')
+    parser.add_argument('--img_dir',default='/media/NAS/nas_187/datasets/cityscapes/leftImg8bit_trainvaltest/leftImg8bit',help='')
+    parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/cityscapes/gtFine_trainvaltest/gtFine')
 
 
     parser.add_argument('--epochs', default=100, type=int, help='')
