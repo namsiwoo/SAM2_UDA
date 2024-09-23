@@ -172,7 +172,7 @@ def main(args, device, class_list):
 
                 if max_miou < np.nanmean(ave_mIOUs):
                     print('save {} epoch!!--ave mIOU: {}'.format(str(epoch), np.nanmean(ave_mIOUs)))
-                    save_checkpoint(os.path.join(args.result, 'model', 'mIOU_best_model.pth'), sam2_model, epoch)
+                    save_checkpoint(os.path.join(args.result, 'model', 'mIOU_best_model.torch'), predictor.model, epoch)
                     max_miou = np.nanmean(ave_mIOUs)
 
                 print(epoch, ': ave mIOU\t{:s} (b mIOU: {}'.format(str(np.nanmean(ave_mIOUs)), max_miou))
