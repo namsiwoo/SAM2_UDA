@@ -72,13 +72,13 @@ def main(args, device, class_list):
                 dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
                     len(img), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
                 )
-
+                print(predictor._features["image_embed"].shape)
                 # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
                 batched_mode = False  # multi mask prediction
                 high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
                                      predictor._features["high_res_feats"]]
                 low_res_masks, prd_scores, _, _ = predictor.model.sam_mask_decoder_ssm(
-                    image_embeddings=predictor._features["image_embed"][-1],
+                    image_embeddings=predictor._features["image_embed"][-1].unsqueeze(0),
                     image_pe=predictor.model.sam_prompt_encoder.get_dense_pe(),
                     sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
                     multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
