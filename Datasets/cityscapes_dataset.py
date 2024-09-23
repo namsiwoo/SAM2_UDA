@@ -49,7 +49,7 @@ class cityscapes_dataset(torch.utils.data.Dataset):
         img_name = img_name.split('/')[-1]
         print(img_name)
         # mask = cv2.imread(os.path.join(self.args.mask_dir, img_name), cv2.IMREAD_UNCHANGED)
-        mask = Image.open(os.path.join(self.args.mask_dir, self.split, city_name, img_name[:-4]+'_gtFine_labelIds.png'))
+        mask = Image.open(os.path.join(self.args.mask_dir, self.split, city_name, img_name[:-16]+'_gtFine_labelIds.png'))
 
         sample = [img, mask]
 
