@@ -59,27 +59,28 @@ Label = namedtuple('Label', [
 labels = [
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
     Label('void', 0, 0, 'void', 0, False, True, (0, 0, 0)),
-    Label('building', 1, 3, 'void', 0, False, True, (0, 0, 0)),
-    Label('road', 2, 1, 'void', 0, False, True, (0, 0, 0)),
-    Label('sidewalk', 3, 2, 'void', 0, False, True, (0, 0, 0)),
-    Label('fence', 4, 5, 'void', 0, False, True, (0, 0, 0)),
-    Label('vegetation', 5, 9, 'void', 0, False, True, (111, 74, 0)),
-    Label('pole', 6, 6, 'void', 0, False, True, (81, 0, 81)),
-    Label('car', 7, 14, 'flat', 1, False, False, (128, 64, 128)),
-    Label('traffic sign', 8, 8, 'flat', 1, False, False, (244, 35, 232)),
-    Label('pedestrian', 9, 0, 'flat', 1, False, True, (250, 170, 160)),
-    Label('bicycle', 10, 19, 'flat', 1, False, True, (230, 150, 140)),
-    Label('motorcycle', 11, 18, 'construction', 2, False, False, (70, 70, 70)),
-    Label('parking-slot', 12, 0, 'construction', 2, False, False, (102, 102, 156)),
-    Label('road-work', 13, 12, 'construction', 2, False, False, (190, 153, 153)),
-    Label('traffic light', 14, 7, 'construction', 2, False, True, (180, 165, 180)),
-    Label('terrain', 15, 10, 'construction', 2, False, True, (150, 100, 100)),
-    Label('rider', 16, 13, 'construction', 2, False, True, (150, 120, 90)),
-    Label('truck', 17, 15, 'object', 3, False, False, (153, 153, 153)),
-    Label('bus', 18, 16, 'object', 3, False, True, (153, 153, 153)),
-    Label('train', 19, 17, 'object', 3, False, False, (250, 170, 30)),
-    Label('wall', 20, 4, 'object', 3, False, False, (220, 220, 0)),
-    Label('lanemarking', 21, 0, 'nature', 4, False, False, (107, 142, 35)),
+    Label('sky', 1, 11, 'void', 0, False, True, (0, 0, 0)),
+    Label('building', 2, 3, 'void', 0, False, True, (0, 0, 0)),
+    Label('road', 3, 1, 'void', 0, False, True, (0, 0, 0)),
+    Label('sidewalk', 4, 2, 'void', 0, False, True, (0, 0, 0)),
+    Label('fence', 5, 5, 'void', 0, False, True, (0, 0, 0)),
+    Label('vegetation', 6, 9, 'void', 0, False, True, (111, 74, 0)),
+    Label('pole', 7, 6, 'void', 0, False, True, (81, 0, 81)),
+    Label('car', 8, 14, 'flat', 1, False, False, (128, 64, 128)),
+    Label('traffic sign', 9, 8, 'flat', 1, False, False, (244, 35, 232)),
+    Label('pedestrian', 10, 0, 'flat', 1, False, True, (250, 170, 160)),
+    Label('bicycle', 11, 19, 'flat', 1, False, True, (230, 150, 140)),
+    Label('motorcycle', 12, 18, 'construction', 2, False, False, (70, 70, 70)),
+    Label('parking-slot', 13, 0, 'construction', 2, False, False, (102, 102, 156)),
+    Label('road-work', 14, 12, 'construction', 2, False, False, (190, 153, 153)),
+    Label('traffic light', 15, 7, 'construction', 2, False, True, (180, 165, 180)),
+    Label('terrain', 16, 10, 'construction', 2, False, True, (150, 100, 100)),
+    Label('rider', 17, 13, 'construction', 2, False, True, (150, 120, 90)),
+    Label('truck', 18, 15, 'object', 3, False, False, (153, 153, 153)),
+    Label('bus', 19, 16, 'object', 3, False, True, (153, 153, 153)),
+    Label('train', 20, 17, 'object', 3, False, False, (250, 170, 30)),
+    Label('wall', 21, 4, 'object', 3, False, False, (220, 220, 0)),
+    Label('lanemarking', 22, 0, 'nature', 4, False, False, (107, 142, 35)),
 ]
 # name to label object
 name2label = {label.name: label for label in labels}
@@ -138,11 +139,8 @@ class synthia_dataset(torch.utils.data.Dataset): #NO Sky
         # mask = Image.open(os.path.join(self.args.mask_dir, img_name)).convert('I;16')
         mask = mask[:, :, 2].astype(np.uint8)
 
-        print(np.unique(mask), '-')
-
         for i in range(len(id2label)):
             mask[mask == i] = id2label[i].trainId
-        print(np.unique(mask))
         mask = Image.fromarray(mask.astype(np.uint8))
 
         sample = [img1, img2, mask]
