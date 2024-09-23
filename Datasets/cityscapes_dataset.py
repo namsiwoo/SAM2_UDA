@@ -24,12 +24,12 @@ class cityscapes_dataset(torch.utils.data.Dataset):
                 # 'random_affine': 0.3,
                 # 'random_rotation': 30,
                 'random_crop': (512, 1024),
-                'to_tensor': 1, # number of img
+                # 'to_tensor': 1, # number of img
                 'normalize': np.array([self.mean, self.std])
             })
         else:
             self.transform = get_transforms({
-                'to_tensor': 1,
+                # 'to_tensor': 1,
                 'normalize': np.array([self.mean, self.std])
             })
 

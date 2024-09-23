@@ -60,7 +60,7 @@ def main(args, device, class_list):
                 input_point = None
                 input_label = None
                 # image, mask, input_point, input_label = read_batch(data)  # load data batch
-                predictor.set_image(img)  # apply SAM image encoder to the image
+                predictor.set_image_batch(img)  # apply SAM image encoder to the image
                 mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
                                                                                         mask_logits=None, normalize_coords=True)
                 sparse_embeddings, dense_embeddings = predictor.model.sam_prompt_encoder(points=(unnorm_coords, labels), boxes=None,
