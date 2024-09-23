@@ -353,7 +353,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
     parser.add_argument('--resume', default=0, type=int, help='')
     parser.add_argument('--start_val', default=5, type=int)
-    parser.add_argument('--num_classes', default=22, type=int)
+    parser.add_argument('--num_classes', default=19, type=int)
     parser.add_argument('--plt', action='store_true')
     parser.add_argument('--use_sam', action='store_true')
 
@@ -385,9 +385,13 @@ if __name__ == '__main__':
     if args.model_type == 'deeplabv3_resnet50':
         args.model_path = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/best_deeplabv3_resnet50_voc_os16.pth'
 
-    class_list = ['void', 'sky', 'building', 'road', 'sidewalk', 'fence', 'vegetation', 'pole', 'car', 'traffic sign',
-                  'pedestrian', 'bicycle', 'motorcycle', 'parking-slot', 'road-work', 'traffic light', 'terrain',
-                  'rider', 'truck', 'bus', 'train', 'wall', 'lanemarking']
+    # class_list = ['void', 'sky', 'building', 'road', 'sidewalk', 'fence', 'vegetation', 'pole', 'car', 'traffic sign',
+    #               'pedestrian', 'bicycle', 'motorcycle', 'parking-slot', 'road-work', 'traffic light', 'terrain',
+    #               'rider', 'truck', 'bus', 'train', 'wall', 'lanemarking']
+
+    class_list = ['void', 'road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'traffic light', 'traffic sign',
+                  'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
+
 
     print('=' * 40)
     print(' ' * 14 + 'Arguments')
