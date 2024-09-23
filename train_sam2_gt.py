@@ -42,7 +42,7 @@ def main(args, device, class_list):
     predictor.model.sam_mask_decoder_ssm.train(True)
 
 
-    optimizer = torch.optim.AdamW(params=predictor.model.parameters(), lr=1e-5, weight_decay=4e-5)
+    optimizer = torch.optim.AdamW(params=predictor.model.parameters(), lr=args.lr) #, weight_decay=4e-5
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
     scaler = torch.cuda.amp.GradScaler()  # set mixed precision
 
