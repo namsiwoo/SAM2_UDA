@@ -57,7 +57,6 @@ def main(args, device, class_list):
     max_miou = 0
     total_train_loss = []
     for epoch in range(args.epochs):
-        predictor.train()
         train_loss = 0
         for iter, batch in enumerate(train_dataloader): # batch[0]
             with torch.cuda.amp.autocast():  # cast to mix precision
@@ -118,7 +117,6 @@ def main(args, device, class_list):
 
         if epoch >= args.start_val:
             os.makedirs(os.path.join(args.result, 'img', str(epoch)), exist_ok=True)
-            predictor.eval()
             hist = np.zeros((args.num_classes+1, args.num_classes+1))
             ave_mIOUs = []
 
