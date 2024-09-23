@@ -9,7 +9,7 @@ from Datasets.synthia_dataset import synthia_dataset
 from SS_model.deeplab_v3 import modeling
 
 from utils.utils import colorEncode, save_checkpoint
-from utils.compute_iou import DiceLoss, fast_hist, per_class_iu
+from utils.compute_iou import SoftDiceLoss, fast_hist, per_class_iu
 
 import csv
 from scipy.io import loadmat
@@ -47,7 +47,7 @@ def main(args, device, class_list):
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
 
-    criterion_dice = DiceLoss()
+    criterion_dice = SoftDiceLoss()
     criterion_ce = torch.nn.CrossEntropyLoss()
 
 
