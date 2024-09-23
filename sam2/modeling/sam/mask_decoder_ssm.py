@@ -56,7 +56,7 @@ class MaskDecoder_ssm(nn.Module):
 
         self.iou_token = nn.Embedding(1, transformer_dim)
         self.num_mask_tokens = num_class + 1
-        self.mask_tokens = nn.Embedding(self.num_multimask_outputs, transformer_dim)
+        self.mask_tokens = nn.Embedding(self.num_mask_tokens, transformer_dim)
 
         self.pred_obj_scores = pred_obj_scores
         if self.pred_obj_scores:
