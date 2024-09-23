@@ -14,7 +14,7 @@ from utils.compute_iou import DiceLoss, fast_hist, per_class_iu
 import csv
 from scipy.io import loadmat
 
-colors = loadmat('data/color150.mat')['colors']
+colors = loadmat('/media/NAS/nas_70/siwoo_data/UDA_citycapes/color150.mat')['colors']
 # names = {}
 # with open('data/object150_info.csv') as f:
 #     reader = csv.reader(f)
