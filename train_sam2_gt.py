@@ -62,12 +62,19 @@ def main(args, device, class_list):
                 input_label = None
                 # image, mask, input_point, input_label = read_batch(data)  # load data batch
                 predictor.set_image_batch(img)  # apply SAM image encoder to the image
-                mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
-                                                                                        mask_logits=None, normalize_coords=True)
-                sparse_embeddings, dense_embeddings = predictor.model.sam_prompt_encoder(points=(unnorm_coords, labels), boxes=None,
-                                                                                         masks=None, )
 
-                batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
+                # mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
+                #                                                                         mask_logits=None, normalize_coords=True)
+                # sparse_embeddings, dense_embeddings = predictor.model.sam_prompt_encoder(points=(unnorm_coords, labels), boxes=None,
+                #                                                                          masks=None, )
+
+                sparse_embeddings = torch.empty((len(img), 0, sam2_model.sam_prompt_embed_dim), device=device)
+                dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
+                    len(img), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
+                )
+
+                # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
+                batched_mode = False  # multi mask prediction
                 high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
                                      predictor._features["high_res_feats"]]
                 low_res_masks, prd_scores, _, _ = predictor.model.sam_mask_decoder(
