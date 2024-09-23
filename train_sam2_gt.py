@@ -77,7 +77,7 @@ def main(args, device, class_list):
                 batched_mode = False  # multi mask prediction
                 high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
                                      predictor._features["high_res_feats"]]
-                low_res_masks, prd_scores, _, _ = predictor.model.sam_mask_decoder(
+                low_res_masks, prd_scores, _, _ = predictor.model.sam_mask_decoder_ssm(
                     image_embeddings=predictor._features["image_embed"][-1].unsqueeze(0),
                     image_pe=predictor.model.sam_prompt_encoder.get_dense_pe(),
                     sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
