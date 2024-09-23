@@ -55,7 +55,7 @@ def main(args, device, class_list):
     for epoch in range(args.epochs):
         for iter, batch in enumerate(train_dataloader): # batch[0]
             with torch.cuda.amp.autocast():  # cast to mix precision
-                img = batch[0][0].permute(0, 2, 3, 1).detach().numpy()
+                img = batch[0][0].permute(0, 2, 3, 1).detach().numpy().tolist()
                 mask = batch[0][1].squeeze(1).to(device)
                 input_point = None
                 input_label = None
