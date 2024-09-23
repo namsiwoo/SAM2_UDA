@@ -154,3 +154,4 @@ if __name__ == '__main__':
 
     print(name2label)
     print(trainId2label)
+    print(id2label[5])
