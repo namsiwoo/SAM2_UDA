@@ -44,8 +44,10 @@ def main(args, device, class_list):
 
     optimizer = torch.optim.AdamW(params=predictor.model.parameters(), lr=1e-5, weight_decay=4e-5)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
-
     scaler = torch.cuda.amp.GradScaler()  # set mixed precision
+
+    criterion_dice = DiceLoss()
+    criterion_ce = torch.nn.CrossEntropyLoss()
 
     train_dataset = cityscapes_dataset(args, 'train')
     val_dataset = cityscapes_dataset(args, 'val')
@@ -84,11 +86,15 @@ def main(args, device, class_list):
                     multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
                 prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[
                     -1])  # Upscale the masks to the original image resolution
-                print(predictor.model.sam_mask_decoder_ssm.num_multimask_outputs)
-                print(prd_masks.shape)
-                prd_mask = torch.sigmoid(prd_masks[:, 0])  # Turn logit map to probability map
 
+                iou_loss = criterion_dice(prd_masks, mask)
+                ce_loss = criterion_ce(prd_masks, mask)
+                loss = iou_loss + ce_loss
 
+                predictor.model.zero_grad()  # empty gradient
+                scaler.scale(loss).backward()  # Backpropogate
+                scaler.step(optimizer)
+                scaler.update()  # Mix precision
 
     #
     #
