@@ -9,7 +9,7 @@ from PIL import Image
 
 import matplotlib.pyplot as plt
 
-class synthia_dataset(torch.utils.data.Dataset):
+class cityscapes_dataset(torch.utils.data.Dataset):
     def __init__(self, args, split):
         self.args = args
         self.split = split
@@ -24,12 +24,12 @@ class synthia_dataset(torch.utils.data.Dataset):
                 # 'random_affine': 0.3,
                 # 'random_rotation': 30,
                 'random_crop': (512, 1024),
-                'to_tensor': 2, # number of img
+                'to_tensor': 1, # number of img
                 'normalize': np.array([self.mean, self.std])
             })
         else:
             self.transform = get_transforms({
-                'to_tensor': 2,
+                'to_tensor': 1,
                 'normalize': np.array([self.mean, self.std])
             })
 
@@ -45,11 +45,10 @@ class synthia_dataset(torch.utils.data.Dataset):
 
         img = Image.open(img_name).convert('RGB')
 
-        mask = cv2.imread(os.path.join(self.args.mask_dir, img_name), cv2.IMREAD_UNCHANGED)
-        # mask = Image.open(os.path.join(self.args.mask_dir, img_name)).convert('I;16')
-        mask = Image.fromarray(mask[:, :, 2].astype(np.uint8))
+        # mask = cv2.imread(os.path.join(self.args.mask_dir, img_name), cv2.IMREAD_UNCHANGED)
+        mask = Image.open(os.path.join(self.args.mask_dir, img_name[:-4]+'_gtFine_labelIds.png'))
 
-        sample = [img1, img2, mask]
+        sample = [img, mask]
 
         sample = self.transform(sample)
 

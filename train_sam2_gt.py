@@ -5,7 +5,7 @@ from PIL import Image
 import numpy as np
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from Datasets.synthia_dataset import synthia_dataset
+from Datasets.cityscapes_dataset import cityscapes_dataset
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
@@ -47,8 +47,8 @@ def main(args, device, class_list):
 
     scaler = torch.cuda.amp.GradScaler()  # set mixed precision
 
-    train_dataset = synthia_dataset(args, 'train')
-    val_dataset = synthia_dataset(args, 'val')
+    train_dataset = cityscapes_dataset(args, 'train')
+    val_dataset = cityscapes_dataset(args, 'val')
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, drop_last=True, num_workers=8)
     val_dataloader = DataLoader(val_dataset)
 
@@ -392,8 +392,11 @@ if __name__ == '__main__':
     parser.add_argument('--test', action='store_true')
 
     parser.add_argument('--model_type', default='deeplabv3_resnet50', help='')
-    parser.add_argument('--img_dir',default='/media/NAS/nas_187/datasets/Cityscapes-Seq/leftImg8bit_sequence_trainvaltest/leftImg8bit_sequence',help='')
-    parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES/GT/LABELS')
+    # parser.add_argument('--img_dir',default='/media/NAS/nas_187/datasets/Cityscapes-Seq/leftImg8bit_sequence_trainvaltest/leftImg8bit_sequence',help='')
+    # parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES/GT/LABELS')
+    parser.add_argument('--img_dir',default='/media/NAS/nas_187/datasets/cityscapes/leftImg8bit_trainvaltest/leftImg8bit/train',help='')
+    parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/cityscapes/gtFine_trainvaltest/gtFine/train')
+
 
     parser.add_argument('--epochs', default=100, type=int, help='')
     parser.add_argument('--batch_size', type=int, default=4, help='')
