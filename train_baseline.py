@@ -72,7 +72,8 @@ def main(args, device, class_list):
             img = batch[0][0]
             if args.use_sam == True:
                 img2 = batch[0][1]
-                img = torch.cat((img, img2), dim=1)
+                # img = torch.cat((img, img2), dim=1)
+                img = (img1+img2)/2
 
             mask = batch[0][2].squeeze(1).to(device)
             img_name = batch[1][0]
