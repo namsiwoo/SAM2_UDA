@@ -84,8 +84,7 @@ def main(args, device, class_list):
                     multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
                 prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[
                     -1])  # Upscale the masks to the original image resolution
-                print(predictor.model.sam_mask_decoder_ssm.num_multimask_outputs)
-                print(prd_masks.shape)
+
                 prd_mask = torch.sigmoid(prd_masks[:, 0])  # Turn logit map to probability map
 
 

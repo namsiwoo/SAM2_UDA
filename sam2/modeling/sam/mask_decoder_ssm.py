@@ -192,13 +192,10 @@ class MaskDecoder_ssm(nn.Module):
             output_tokens = torch.cat(
                 [self.iou_token.weight, self.mask_tokens.weight], dim=0
             )
-        print(output_tokens.shape, '1')
         output_tokens = output_tokens.unsqueeze(0).expand(
             sparse_prompt_embeddings.size(0), -1, -1
         )
-        print(output_tokens.shape, '2')
         tokens = torch.cat((output_tokens, sparse_prompt_embeddings), dim=1)
-        print(image_embeddings.shape, tokens.shape)
 
         # Expand per-image data in batch direction to be per-mask
         if repeat_image:
