@@ -146,6 +146,7 @@ def main(args, device, class_list):
                             -1])  # Upscale the masks to the original image resolution
 
                     mask = batch[0][1].squeeze(1)[0]
+                    img_name = batch[1][0]
                     pred = torch.argmax(prd_masks, dim=1)
                     pred = pred[0].detach().cpu().numpy()
 
@@ -294,7 +295,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=4, help='')
     parser.add_argument('--lr', default=1e-4, type=float)
 
-    parser.add_argument('--print_fq', default=15, type=int, help='')
+    parser.add_argument('--print_fq', default=700, type=int, help='')
 
     parser.add_argument('--result', default='/media/NAS/nas_70/siwoo_data/UDA_result/SAM2_gt', help='')
     parser.add_argument('--test_name', default='None', type=str, help='')
