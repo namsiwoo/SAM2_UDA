@@ -114,7 +114,7 @@ def main(args, device, class_list):
             # iou_loss = criterion_dice(prd_masks, mask)
             # ce_loss = criterion_ce(prd_masks, mask)
             # loss = ce_loss #+ iou_loss
-            loss = cross_entropy2d(pred, mask)
+            loss = cross_entropy2d(prd_masks, mask)
 
             # optimizer.zero_grad()
             # loss.backward()
