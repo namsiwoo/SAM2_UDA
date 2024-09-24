@@ -22,6 +22,21 @@ colors = loadmat('/media/NAS/nas_70/siwoo_data/UDA_citycapes/color150.mat')['col
 #     for row in reader:
 #         names[int(row[0])] = row[5].split(";")[0]
 
+def cross_entropy2d(input, target, weight=None, size_average=True):
+    n, c, h, w = input.size()
+    nt, ht, wt = target.size()
+
+    # Handle inconsistent size between input and target
+    if h != ht and w != wt:  # upsample labels
+        input = F.interpolate(input, size=(ht, wt), mode="bilinear", align_corners=True)
+
+    input = input.transpose(1, 2).transpose(2, 3).contiguous().view(-1, c)
+    target = target.view(-1)
+    loss = F.cross_entropy(
+        input, target, weight=weight, size_average=size_average, ignore_index=250
+    )
+    return loss
+
 def main(args, device, class_list):
     f = open(os.path.join(args.result, 'log.txt'), 'w')
     f.write('=' * 40)
@@ -88,9 +103,11 @@ def main(args, device, class_list):
             else:
                 pred = model(img.to(device))['out']
 
-            iou_loss = criterion_dice(pred, mask)
-            ce_loss = criterion_ce(pred, mask)
-            loss = iou_loss + ce_loss
+            # iou_loss = criterion_dice(pred, mask)
+            # ce_loss = criterion_ce(pred, mask)
+            # loss = iou_loss + ce_loss
+            loss = cross_entropy2d(pred, mask)
+
 
             optimizer.zero_grad()
             loss.backward()
