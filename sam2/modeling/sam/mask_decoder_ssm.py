@@ -30,7 +30,7 @@ class MaskDecoder_ssm(nn.Module):
         pred_obj_scores: bool = False,
         pred_obj_scores_mlp: bool = False,
         use_multimask_token_for_obj_ptr: bool = False,
-        num_class: int = 33,
+        num_class: int = 20,
     ) -> None:
         """
         Predicts masks given an image and prompt embeddings, using a
@@ -205,7 +205,7 @@ class MaskDecoder_ssm(nn.Module):
         else:
             assert image_embeddings.shape[0] == tokens.shape[0]
             src = image_embeddings
-        src = src + dense_prompt_embeddings
+        src = src# + dense_prompt_embeddings
         assert (
             image_pe.size(0) == 1
         ), "image_pe should have size 1 in batch dim (from `get_dense_pe()`)"
@@ -234,7 +234,7 @@ class MaskDecoder_ssm(nn.Module):
             )
         hyper_in = torch.stack(hyper_in_list, dim=1)
         b, c, h, w = upscaled_embedding.shape
-        masks = (hyper_in @ upscaled_embedding.view(b, c, h * w)).view(b, -1, h, w)
+        masks = (hyper_in @ upscaled_embedding.view(b, c, h * w)).view(b, -1, h, w) # 20 * emb // batch, emb, 224, 224
 
         # Generate mask quality predictions
         iou_pred = self.iou_prediction_head(iou_token_out)
