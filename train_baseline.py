@@ -34,8 +34,8 @@ def main(args, device, class_list):
     # print(model)
 
     input_channel = 3
-    if args.use_sam == True:
-        input_channel = 6
+    # if args.use_sam == True:
+    #     input_channel = 6
 
     # import torch
     # model_name = 'V3'
