@@ -39,7 +39,7 @@ def main(args, device, class_list):
 
     sam2_model = build_sam2(model_cfg, sam2_checkpoint, device="cuda")  # load model
     predictor = SAM2ImagePredictor(sam2_model)
-    for name, para in predictor.sam_mask_decoder_ssm.named_parameters():
+    for name, para in predictor.model.named_parameters():
         if "sam_mask_decoder_ssm" in name:
             para.requires_grad_(True)
 
