@@ -4,6 +4,8 @@ import argparse
 from PIL import Image
 import numpy as np
 import torch.nn as nn
+import torch.nn.functional as F
+
 from torch.utils.data import DataLoader
 from Datasets.synthia_dataset import synthia_dataset
 from SS_model.R2Unet import R2U_Net

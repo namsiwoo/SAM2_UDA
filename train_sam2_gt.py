@@ -4,6 +4,8 @@ import argparse
 from PIL import Image
 import numpy as np
 import torch.nn as nn
+import torch.nn.functional as F
+
 from torch.utils.data import DataLoader
 from Datasets.cityscapes_dataset import cityscapes_dataset
 from sam2.build_sam import build_sam2
