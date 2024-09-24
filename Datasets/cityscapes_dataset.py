@@ -147,11 +147,9 @@ class cityscapes_dataset(torch.utils.data.Dataset):
         mask = np.array(mask)
         for i in range(len(id2label)):
             mask[mask == i] = id2label[i].trainId +1
-            print(i, id2label[i].trainId +1)
         mask = Image.fromarray(mask.astype(np.uint8))
 
         sample = [img, mask]
-        print('----')
 
         sample = self.transform(sample)
 
