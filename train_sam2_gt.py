@@ -59,6 +59,8 @@ def main(args, device, class_list):
     for name, para in predictor.model.named_parameters():
         if "sam_mask_decoder_ssm" in name:
             para.requires_grad_(True)
+        else:
+            para.requires_grad(False)
 
     # predictor.model.sam_mask_decoder_ssm.train(True)
     # predictor.model.no_mask_embed.requires_grad = True
