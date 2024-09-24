@@ -92,7 +92,7 @@ def main(args, device, class_list):
 
                 iou_loss = criterion_dice(prd_masks, mask)
                 ce_loss = criterion_ce(prd_masks, mask)
-                loss = iou_loss + ce_loss
+                loss = ce_loss #+ iou_loss
 
             predictor.model.zero_grad()  # empty gradient
             scaler.scale(loss).backward()  # Backpropogate
