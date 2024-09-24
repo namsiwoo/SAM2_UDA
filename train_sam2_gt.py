@@ -75,7 +75,7 @@ def main(args, device, class_list):
                 #                                                                          masks=None, )
 
                 sparse_embeddings = torch.empty((len(img), 0, sam2_model.sam_prompt_embed_dim), device=device)
-                dense_embeddings = sam2_model.sam_mask_decoder_ssm.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
+                dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
                     len(img), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
                 )
 
