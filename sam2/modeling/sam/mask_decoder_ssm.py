@@ -108,7 +108,7 @@ class MaskDecoder_ssm(nn.Module):
         self.dynamic_multimask_stability_delta = dynamic_multimask_stability_delta
         self.dynamic_multimask_stability_thresh = dynamic_multimask_stability_thresh
 
-        self.no_mask_embed = torch.nn.Embedding(1, self.sam_prompt_embed_dim)
+        # self.no_mask_embed = torch.nn.Embedding(1, self.sam_prompt_embed_dim)
 
     def forward(
         self,
