@@ -74,7 +74,7 @@ def main(args, device, class_list):
                 #                                                                          masks=None, )
 
                 sparse_embeddings = torch.empty((len(img), 0, sam2_model.sam_prompt_embed_dim), device=device)
-                dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
+                dense_embeddings = sam2_model.sam_mask_decoder_ssm.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
                     len(img), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
                 )
 
@@ -87,8 +87,7 @@ def main(args, device, class_list):
                     image_pe=predictor.model.sam_prompt_encoder.get_dense_pe(),
                     sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
                     multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
-                prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[
-                    -1])  # Upscale the masks to the original image resolution
+                prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[-1])  # Upscale the masks to the original image resolution
 
                 iou_loss = criterion_dice(prd_masks, mask)
                 ce_loss = criterion_ce(prd_masks, mask)

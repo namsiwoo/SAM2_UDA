@@ -252,8 +252,6 @@ class SAM2Base(torch.nn.Module):
         else:
             self.obj_ptr_tpos_proj = torch.nn.Identity()
 
-        self.no_mask_embed = torch.nn.Embedding(1, self.sam_prompt_embed_dim)
-
     def _forward_sam_heads(
         self,
         backbone_features,
