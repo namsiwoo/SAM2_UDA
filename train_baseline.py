@@ -73,7 +73,7 @@ def main(args, device, class_list):
             if args.use_sam == True:
                 img2 = batch[0][1]
                 # img = torch.cat((img, img2), dim=1)
-                img = (img1+img2)/2
+                # img = (img1+img2)/2
 
             mask = batch[0][2].squeeze(1).to(device)
             img_name = batch[1][0]
@@ -367,8 +367,8 @@ if __name__ == '__main__':
     parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES/GT/LABELS')
 
     parser.add_argument('--epochs', default=100, type=int, help='')
-    parser.add_argument('--batch_size', type=int, default=32, help='')
-    parser.add_argument('--lr', default=1e-4, type=float)
+    parser.add_argument('--batch_size', type=int, default=8, help='')
+    parser.add_argument('--lr', default=1e-6, type=float)
 
     parser.add_argument('--print_fq', default=15, type=int, help='')
 
