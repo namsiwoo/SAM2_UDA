@@ -38,11 +38,12 @@ def main(args, device, class_list):
         input_channel = 6
 
     # import torch
+    # model_name = 'V3'
     # model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
     # model.backbone.conv1 = nn.Conv2d(input_channel, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
     # model.classifier[-1] = nn.Conv2d(256, args.num_classes+1, kernel_size=(1, 1), stride=(1, 1))
 
-
+    model_name = 'Unet'
     model = R2U_Net(img_ch = input_channel, output_ch=args.num_classes+1)
 
 
@@ -81,7 +82,11 @@ def main(args, device, class_list):
 
             mask = batch[0][2].squeeze(1).to(device)
             img_name = batch[1][0]
-            pred = model(img.to(device))['out']
+
+            if model_name == 'Unet':
+                pred = model(img.to(device))
+            else:
+                pred = model(img.to(device))['out']
 
             iou_loss = criterion_dice(pred, mask)
             ce_loss = criterion_ce(pred, mask)
@@ -227,7 +232,12 @@ def main(args, device, class_list):
 
                     mask = batch[0][2].squeeze(1)[0]
                     img_name = batch[1][0]
-                    pred = model(img.to(device))['out']
+
+                    if model_name == 'Unet':
+                        pred = model(img.to(device))
+                    else:
+                        pred = model(img.to(device))['out']
+
                     pred = torch.argmax(pred, dim=1)
                     pred = pred[0].detach().cpu().numpy()
 
