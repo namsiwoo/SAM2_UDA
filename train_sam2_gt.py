@@ -60,48 +60,48 @@ def main(args, device, class_list):
     for epoch in range(args.epochs):
         train_loss = 0
         for iter, batch in enumerate(train_dataloader): # batch[0]
-            # with torch.cuda.amp.autocast():  # cast to mix precision
-            img = list(batch[0][0].permute(0, 2, 3, 1).detach().numpy())
+            with torch.cuda.amp.autocast():  # cast to mix precision
+                img = list(batch[0][0].permute(0, 2, 3, 1).detach().numpy())
 
-            mask = batch[0][1].squeeze(1).to(device)
-            input_point = None
-            input_label = None
-            # image, mask, input_point, input_label = read_batch(data)  # load data batch
-            predictor.set_image_batch(img)  # apply SAM image encoder to the image
+                mask = batch[0][1].squeeze(1).to(device)
+                input_point = None
+                input_label = None
+                # image, mask, input_point, input_label = read_batch(data)  # load data batch
+                predictor.set_image_batch(img)  # apply SAM image encoder to the image
 
-            # mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
-            #                                                                         mask_logits=None, normalize_coords=True)
-            # sparse_embeddings, dense_embeddings = predictor.model.sam_prompt_encoder(points=(unnorm_coords, labels), boxes=None,
-            #                                                                          masks=None, )
+                # mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
+                #                                                                         mask_logits=None, normalize_coords=True)
+                # sparse_embeddings, dense_embeddings = predictor.model.sam_prompt_encoder(points=(unnorm_coords, labels), boxes=None,
+                #                                                                          masks=None, )
 
-            sparse_embeddings = torch.empty((len(img), 0, sam2_model.sam_prompt_embed_dim), device=device)
-            dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
-                len(img), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
-            )
+                sparse_embeddings = torch.empty((len(img), 0, sam2_model.sam_prompt_embed_dim), device=device)
+                dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
+                    len(img), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
+                )
 
-            # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
-            batched_mode = False  # multi mask prediction
-            high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
-                                 predictor._features["high_res_feats"]]
-            low_res_masks, prd_scores, _, _ = predictor.model.sam_mask_decoder_ssm(
-                image_embeddings=predictor._features["image_embed"],
-                image_pe=predictor.model.sam_prompt_encoder.get_dense_pe(),
-                sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
-                multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
-            prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[-1])  # Upscale the masks to the original image resolution
+                # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
+                batched_mode = False  # multi mask prediction
+                high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
+                                     predictor._features["high_res_feats"]]
+                low_res_masks, prd_scores, _, _ = predictor.model.sam_mask_decoder_ssm(
+                    image_embeddings=predictor._features["image_embed"],
+                    image_pe=predictor.model.sam_prompt_encoder.get_dense_pe(),
+                    sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
+                    multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
+                prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[-1])  # Upscale the masks to the original image resolution
 
             iou_loss = criterion_dice(prd_masks, mask)
             ce_loss = criterion_ce(prd_masks, mask)
             loss = ce_loss #+ iou_loss
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            # optimizer.zero_grad()
+            # loss.backward()
+            # optimizer.step()
 
-            # predictor.model.zero_grad()  # empty gradient
-            # scaler.scale(loss).backward()  # Backpropogate
-            # scaler.step(optimizer)
-            # scaler.update()  # Mix precision
+            predictor.model.zero_grad()  # empty gradient
+            scaler.scale(loss).backward()  # Backpropogate
+            scaler.step(optimizer)
+            scaler.update()  # Mix precision
 
             lr_scheduler.step()
 
@@ -294,7 +294,7 @@ if __name__ == '__main__':
 
 
     parser.add_argument('--epochs', default=100, type=int, help='')
-    parser.add_argument('--batch_size', type=int, default=4, help='')
+    parser.add_argument('--batch_size', type=int, default=16, help='')
     parser.add_argument('--lr', default=1e-4, type=float)
 
     parser.add_argument('--print_fq', default=700, type=int, help='')
