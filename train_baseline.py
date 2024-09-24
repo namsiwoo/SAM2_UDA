@@ -6,7 +6,7 @@ import numpy as np
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from Datasets.synthia_dataset import synthia_dataset
-from SS_model.deeplab_v3 import modeling
+from SS_model.R2Unet import R2U_Net
 
 from utils.utils import colorEncode, save_checkpoint
 from utils.compute_iou import SoftDiceLoss, fast_hist, per_class_iu
@@ -33,15 +33,19 @@ def main(args, device, class_list):
     # model.load_state_dict(torch.load(args.model_path)['model_state'])
     # print(model)
 
-    import torch
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
-
     input_channel = 3
     if args.use_sam == True:
         input_channel = 6
-    model.backbone.conv1 = nn.Conv2d(input_channel, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
-    model.classifier[-1] = nn.Conv2d(256, args.num_classes+1, kernel_size=(1, 1), stride=(1, 1))
-    # model.aux_classifier[-1] = nn.Conv2d(256, 12, kernel_size=(1, 1), stride=(1, 1))
+
+    # import torch
+    # model = torch.hub.load('pytorch/vision:v0.10.0', 'deeplabv3_resnet50', pretrained=True)
+    # model.backbone.conv1 = nn.Conv2d(input_channel, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+    # model.classifier[-1] = nn.Conv2d(256, args.num_classes+1, kernel_size=(1, 1), stride=(1, 1))
+
+
+    model = R2U_Net(img_ch = input_channel, output_ch=args.num_classes+1)
+
+
     model = model.to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
