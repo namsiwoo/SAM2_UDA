@@ -105,10 +105,10 @@ def main(args, device, class_list):
             else:
                 pred = model(img.to(device))['out']
 
-            # iou_loss = criterion_dice(pred, mask)
-            # ce_loss = criterion_ce(pred, mask)
-            # loss = iou_loss + ce_loss
-            loss = cross_entropy2d(pred, mask)
+            iou_loss = criterion_dice(pred, mask)
+            ce_loss = criterion_ce(pred, mask)
+            loss = iou_loss + ce_loss
+            # loss = cross_entropy2d(pred, mask)
 
 
             optimizer.zero_grad()
