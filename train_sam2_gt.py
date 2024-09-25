@@ -65,6 +65,10 @@ def main(args, device, class_list):
     # predictor.model.sam_mask_decoder_ssm.train(True)
     # predictor.model.no_mask_embed.requires_grad = True
 
+    dropout_modules = [module for module in sam2_model.modules() if isinstance(module, torch.nn.Dropout)]
+    [module.eval() for module in dropout_modules]
+    # bn_modules = [module for module in net.module.modules() if isinstance(module, torch.nn.BatchNorm2d)]
+
 
     optimizer = torch.optim.AdamW(params=predictor.model.parameters(), lr=args.lr) #, weight_decay=4e-5
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
@@ -82,6 +86,7 @@ def main(args, device, class_list):
     total_train_loss = []
     for epoch in range(args.epochs):
         train_loss = 0
+        sam2_model.train()
         for iter, batch in enumerate(train_dataloader): # batch[0]
             # with torch.cuda.amp.autocast():  # cast to mix precision
             img = list(batch[0][0].permute(0, 2, 3, 1).detach().numpy())
@@ -144,6 +149,7 @@ def main(args, device, class_list):
         print('{} epoch, mean train loss: {}'.format(epoch, total_train_loss[-1]))
 
         if epoch >= args.start_val:
+            sam2_model.eval()
             os.makedirs(os.path.join(args.result, 'img', str(epoch)), exist_ok=True)
             hist = np.zeros((args.num_classes+1, args.num_classes+1))
             ave_mIOUs = []
