@@ -60,6 +60,7 @@ def split_forward(predictor, input, h_size=512, w_size=1024, device=None):
             ind2_e = j + w_size - overlap // 2 if j + w_size < w else w
 
             input_patch = input[:, :, i:r_end, j:c_end].permute(0, 2, 3, 1)
+            print(input_patch.shape, '-----')
 
             with torch.no_grad():
                 predictor.set_image(input_patch.numpy())  # apply SAM image encoder to the image
