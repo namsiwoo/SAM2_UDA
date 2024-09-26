@@ -59,10 +59,10 @@ def split_forward(predictor, input, h_size=512, w_size=1024, device=None):
             ind2_s = j + overlap // 2 if j > 0 else 0
             ind2_e = j + w_size - overlap // 2 if j + w_size < w else w
 
-            input_patch = input[:, :, i:r_end, j:c_end]
+            input_patch = input[:, :, i:r_end, j:c_end].permute(0, 2, 3, 1)
 
             with torch.no_grad():
-                predictor.set_image(input_patch.permute(0, 2, 3, 1))  # apply SAM image encoder to the image
+                predictor.set_image(input_patch)  # apply SAM image encoder to the image
 
                 # mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
                 #                                                                         mask_logits=None, normalize_coords=True)
