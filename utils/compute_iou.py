@@ -8,6 +8,9 @@ from PIL import Image
 from os.path import join
 
 
+
+
+#################################### loss
 class DiceLoss(nn.Module):
     """Dice Loss PyTorch
         Created by: Zhang Shuai
@@ -150,6 +153,8 @@ def sum_tensor(inp, axes, keepdim=False):
         for ax in sorted(axes, reverse=True):
             inp = inp.sum(int(ax))
     return inp
+
+# ---------------------------------------------------
 def fast_hist(a, b, n):
     k = (a >= 0) & (a < n)
     return np.bincount(n * a[k].astype(int) + b[k], minlength=n ** 2).reshape(n, n)
