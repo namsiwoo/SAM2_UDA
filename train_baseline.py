@@ -333,6 +333,8 @@ def main(args, device, class_list):
                     max_miou = np.nanmean(ave_mIOUs)
 
                 print(epoch, ': ave mIOU\t{:s} (b mIOU: {}'.format(str(np.nanmean(ave_mIOUs)), max_miou))
+                if max_miou < 15:
+                    args.start_val = epoch + 10
 
 
 def test(args, device):
