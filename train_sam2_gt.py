@@ -149,7 +149,7 @@ def main(args, device, class_list):
     train_dataset = cityscapes_dataset(args, 'train')
     val_dataset = cityscapes_dataset(args, 'val')
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, drop_last=True, num_workers=8)
-    val_dataloader = DataLoader(val_dataset)
+    val_dataloader = DataLoader(val_dataset, num_workers=8)
 
     max_miou = 0
     total_train_loss = []
