@@ -39,7 +39,7 @@ def cross_entropy2d(input, target, weight=None, size_average=True):
     )
     return loss
 
-def split_forward(model, input, h_size=512, w_size=1024):
+def split_forward(model, input, h_size=512, w_size=1024, device=None):
     # size = 224
     overlap = 80
 
@@ -77,7 +77,7 @@ def split_forward(model, input, h_size=512, w_size=1024):
 
             with torch.no_grad():
 
-                pred = model(input_patch)
+                pred = model(input_patch.to(device))
 
             output[:, :, ind1_s:ind1_e, ind2_s:ind2_e] = pred[:, :, ind1_s - i:ind1_e - i,
                                                      ind2_s - j:ind2_e - j]
@@ -300,7 +300,7 @@ def main(args, device, class_list):
                     img_name = batch[1][0]
 
                     if model_name == 'Unet':
-                        pred = split_forward(model, img.to(device), h_size=512, w_size=1024)
+                        pred = split_forward(model, img, h_size=512, w_size=1024, device=device)
                     else:
                         pred = model(img.to(device))['out']
 
