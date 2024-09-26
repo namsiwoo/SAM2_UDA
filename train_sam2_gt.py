@@ -230,6 +230,7 @@ def main(args, device, class_list):
                     prd_masks = split_forward(predictor, img, h_size=512, w_size=1024, device=device)
 
                     mask = batch[0][1].squeeze(1)[0]
+                    print(prd_masks.shape)
                     img_name = batch[1][0]
                     pred = torch.argmax(prd_masks, dim=1)
                     pred = pred[0].detach().cpu().numpy()
