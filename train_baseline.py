@@ -39,6 +39,52 @@ def cross_entropy2d(input, target, weight=None, size_average=True):
     )
     return loss
 
+def split_forward(model, input, h_size=512, w_size=1024):
+    # size = 224
+    overlap = 80
+
+    b, c, h0, w0 = input.size()
+
+    # zero pad for border patches
+    pad_h = 0
+    # here the padding is to make the the image size could be divided exactly by the size - overlap (the length of step)
+    if h0 - h_size > 0 and (h0 - h_size) % (h_size - overlap) > 0:
+        pad_h = (h_size - overlap) - (h0 - h_size) % (h_size - overlap)  # size is the the input size of model
+        tmp = torch.zeros((b, c, pad_h, w0))
+        input = torch.cat((input, tmp), dim=2)
+
+    if w0 - w_size > 0 and (w0 - w_size) % (w_size - overlap) > 0:  # same as the above
+        pad_w = (w_size - overlap) - (w0 - w_size) % (w_size - overlap)
+        tmp = torch.zeros((b, c, h0 + pad_h, pad_w))
+        input = torch.cat((input, tmp), dim=3)
+
+    _, c, h, w = input.size()
+
+    output = torch.zeros((input.size(0), 1, h, w))
+
+    for i in range(0, h - overlap, h_size - overlap):
+        r_end = i + h_size if i + h_size < h else h
+        ind1_s = i + overlap // 2 if i > 0 else 0
+        ind1_e = i + h_size - overlap // 2 if i + h_size < h else h
+
+        for j in range(0, w - overlap, w_size - overlap):
+            c_end = j + w_size if j + w_size < w else w
+
+            ind2_s = j + overlap // 2 if j > 0 else 0
+            ind2_e = j + w_size - overlap // 2 if j + w_size < w else w
+
+            input_patch = input[:, :, i:r_end, j:c_end]
+
+            with torch.no_grad():
+
+                pred = model(input_patch)
+
+            output[:, :, ind1_s:ind1_e, ind2_s:ind2_e] = pred[:, :, ind1_s - i:ind1_e - i,
+                                                     ind2_s - j:ind2_e - j]
+
+    output = output[:, :, :h0, :w0]
+    return output
+
 def main(args, device, class_list):
     f = open(os.path.join(args.result, 'log.txt'), 'w')
     f.write('=' * 40)
@@ -254,7 +300,7 @@ def main(args, device, class_list):
                     img_name = batch[1][0]
 
                     if model_name == 'Unet':
-                        pred = model(img.to(device))
+                        pred = split_forward(model, img.to(device), h_size=512, w_size=1024)
                     else:
                         pred = model(img.to(device))['out']
 
