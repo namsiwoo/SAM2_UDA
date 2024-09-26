@@ -25,6 +25,74 @@ colors = loadmat('/media/NAS/nas_70/siwoo_data/UDA_citycapes/color150.mat')['col
 #     for row in reader:
 #         names[int(row[0])] = row[5].split(";")[0]
 
+def split_forward(predictor, input, h_size=512, w_size=1024, device=None):
+    # size = 224
+    overlap = 80
+
+    b, c, h0, w0 = input.size()
+
+    # zero pad for border patches
+    pad_h = 0
+    # here the padding is to make the the image size could be divided exactly by the size - overlap (the length of step)
+    if h0 - h_size > 0 and (h0 - h_size) % (h_size - overlap) > 0:
+        pad_h = (h_size - overlap) - (h0 - h_size) % (h_size - overlap)  # size is the the input size of model
+        tmp = torch.zeros((b, c, pad_h, w0))
+        input = torch.cat((input, tmp), dim=2)
+
+    if w0 - w_size > 0 and (w0 - w_size) % (w_size - overlap) > 0:  # same as the above
+        pad_w = (w_size - overlap) - (w0 - w_size) % (w_size - overlap)
+        tmp = torch.zeros((b, c, h0 + pad_h, pad_w))
+        input = torch.cat((input, tmp), dim=3)
+
+    _, c, h, w = input.size()
+
+    output = torch.zeros((input.size(0), 20, h, w))
+
+    for i in range(0, h - overlap, h_size - overlap):
+        r_end = i + h_size if i + h_size < h else h
+        ind1_s = i + overlap // 2 if i > 0 else 0
+        ind1_e = i + h_size - overlap // 2 if i + h_size < h else h
+
+        for j in range(0, w - overlap, w_size - overlap):
+            c_end = j + w_size if j + w_size < w else w
+
+            ind2_s = j + overlap // 2 if j > 0 else 0
+            ind2_e = j + w_size - overlap // 2 if j + w_size < w else w
+
+            input_patch = input[:, :, i:r_end, j:c_end]
+
+            with torch.no_grad():
+                predictor.set_image_batch(input_patch)  # apply SAM image encoder to the image
+
+                # mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
+                #                                                                         mask_logits=None, normalize_coords=True)
+                # sparse_embeddings, dense_embeddings = predictor.model.sam_prompt_encoder(points=(unnorm_coords, labels), boxes=None,
+                #                                                                          masks=None, )
+
+                sparse_embeddings = torch.empty((len(input_patch), 0, predictor.model.sam_prompt_embed_dim), device=device)
+                dense_embeddings = predictor.model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
+                    len(input_patch), -1, predictor.model.sam_image_embedding_size, predictor.model.sam_image_embedding_size
+                )
+
+                # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
+                batched_mode = False  # multi mask prediction
+                high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
+                                     predictor._features["high_res_feats"]]
+                low_res_masks, prd_scores, _, _ = predictor.model.sam_mask_decoder_ssm(
+                    image_embeddings=predictor._features["image_embed"],
+                    image_pe=predictor.model.sam_prompt_encoder.get_dense_pe(),
+                    sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
+                    multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
+                prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[
+                    -1])  # Upscale the masks to the original image resolution
+
+
+            output[:, :, ind1_s:ind1_e, ind2_s:ind2_e] = prd_masks[:, :, ind1_s - i:ind1_e - i,
+                                                     ind2_s - j:ind2_e - j]
+
+    output = output[:, :, :h0, :w0]
+    return output
+
 def cross_entropy2d(input, target, weight=None, size_average=True):
     n, c, h, w = input.size()
     nt, ht, wt = target.size()
@@ -103,9 +171,9 @@ def main(args, device, class_list):
             # sparse_embeddings, dense_embeddings = predictor.model.sam_prompt_encoder(points=(unnorm_coords, labels), boxes=None,
             #                                                                          masks=None, )
 
-            sparse_embeddings = torch.empty((len(img), 0, sam2_model.sam_prompt_embed_dim), device=device)
-            dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
-                len(img), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
+            sparse_embeddings = torch.empty((len(img), 0, predictor.model.sam_prompt_embed_dim), device=device)
+            dense_embeddings = predictor.model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
+                len(img), -1, predictor.model.sam_image_embedding_size, predictor.model.sam_image_embedding_size
             )
 
             # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
@@ -162,9 +230,9 @@ def main(args, device, class_list):
                         img = list(batch[0][0].permute(0, 2, 3, 1).detach().numpy())
                         predictor.set_image_batch(img)  # apply SAM image encoder to the image
 
-                        sparse_embeddings = torch.empty((len(img), 0, sam2_model.sam_prompt_embed_dim), device=device)
-                        dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
-                            len(img), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
+                        sparse_embeddings = torch.empty((len(img), 0, predictor.model.sam_prompt_embed_dim), device=device)
+                        dense_embeddings = predictor.model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
+                            len(img), -1, predictor.model.sam_image_embedding_size, predictor.model.sam_image_embedding_size
                         )
 
                         # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction

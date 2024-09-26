@@ -60,7 +60,7 @@ def split_forward(model, input, h_size=512, w_size=1024, device=None):
 
     _, c, h, w = input.size()
 
-    output = torch.zeros((input.size(0), 1, h, w))
+    output = torch.zeros((input.size(0), 20, h, w))
 
     for i in range(0, h - overlap, h_size - overlap):
         r_end = i + h_size if i + h_size < h else h
