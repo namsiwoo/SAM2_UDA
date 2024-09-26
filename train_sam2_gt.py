@@ -63,7 +63,7 @@ def split_forward(predictor, input, h_size=512, w_size=1024, device=None):
             print(input_patch.shape, '-----')
 
             with torch.no_grad():
-                predictor.set_image_batch(input_patch.numpy())  # apply SAM image encoder to the image
+                predictor.set_image_batch(list(input_patch.numpy()))  # apply SAM image encoder to the image
 
                 # mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
                 #                                                                         mask_logits=None, normalize_coords=True)
