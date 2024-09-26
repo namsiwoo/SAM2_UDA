@@ -62,7 +62,7 @@ def split_forward(predictor, input, h_size=512, w_size=1024, device=None):
             input_patch = input[:, :, i:r_end, j:c_end]
 
             with torch.no_grad():
-                predictor.set_image(input_patch)  # apply SAM image encoder to the image
+                predictor.set_image(input_patch.permute(0, 2, 3, 1))  # apply SAM image encoder to the image
 
                 # mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
                 #                                                                         mask_logits=None, normalize_coords=True)
@@ -226,7 +226,7 @@ def main(args, device, class_list):
 
             with torch.no_grad():
                 for iter, batch in enumerate(val_dataloader):
-                    img = batch[0][0].permute(0, 2, 3, 1)
+                    img = batch[0][0]
                     prd_masks = split_forward(predictor, img, h_size=512, w_size=1024, device=device)
 
                     mask = batch[0][1].squeeze(1)[0]
