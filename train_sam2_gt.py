@@ -128,6 +128,7 @@ def main(args, device, class_list):
         if "sam_mask_decoder_ssm" in name:
             para.requires_grad_(True)
         else:
+            para.requires_grad_(False)
             para.requires_grad_(True)
 
     predictor.model.sam_prompt_encoder.no_mask_embed.requires_grad = True
