@@ -130,8 +130,11 @@ def main(args, device, class_list):
         # else:
         #     para.requires_grad_(True)
 
-
     predictor.model.no_mask_embed.requires_grad = True
+
+    for name, p in predictor.model.named_parameters():
+        if p.requires_grad:
+            print('========', name)
 
     dropout_modules = [module for module in sam2_model.modules() if isinstance(module, torch.nn.Dropout)]
     [module.eval() for module in dropout_modules]
