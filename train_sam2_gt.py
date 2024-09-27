@@ -130,7 +130,7 @@ def main(args, device, class_list):
         else:
             para.requires_grad_(False)
 
-    predictor.model.no_mask_embed.requires_grad = True
+    predictor.model.sam_prompt_encoder.no_mask_embed.requires_grad = True
 
     for name, p in predictor.model.named_parameters():
         if p.requires_grad:
