@@ -363,7 +363,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
     parser.add_argument('--resume', default=0, type=int, help='')
     parser.add_argument('--start_val', default=5, type=int)
-    parser.add_argument('--num_classes', default=19, type=int)
+    parser.add_argument('--num_classes', default=12, type=int)
     parser.add_argument('--plt', action='store_true')
     parser.add_argument('--use_sam', action='store_true')
 
