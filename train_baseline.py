@@ -8,6 +8,7 @@ import torch.nn.functional as F
 
 from torch.utils.data import DataLoader
 from Datasets.synthia_dataset import synthia_dataset
+from Datasets.cityscapes_dataset import cityscapes_dataset
 from SS_model.R2Unet import R2U_Net
 
 from utils.utils import colorEncode, save_checkpoint
@@ -119,8 +120,12 @@ def main(args, device, class_list):
     criterion_ce = torch.nn.CrossEntropyLoss()
 
 
-    train_dataset = synthia_dataset(args, 'train')
-    val_dataset = synthia_dataset(args, 'val')
+    # train_dataset = synthia_dataset(args, 'train')
+    # val_dataset = synthia_dataset(args, 'val')
+
+    train_dataset = cityscapes_dataset(args, 'train')
+    val_dataset = cityscapes_dataset(args, 'val')
+
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, drop_last=True, num_workers=8)
     val_dataloader = DataLoader(val_dataset)
