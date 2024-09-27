@@ -25,7 +25,7 @@ colors = loadmat('/media/NAS/nas_70/siwoo_data/UDA_citycapes/color150.mat')['col
 #     for row in reader:
 #         names[int(row[0])] = row[5].split(";")[0]
 
-def split_forward(predictor, input, h_size=512, w_size=1024, device=None):
+def split_forward(predictor, input, num_classes, h_size=512, w_size=1024, device=None):
     # size = 224
     overlap = 80
 
@@ -46,7 +46,7 @@ def split_forward(predictor, input, h_size=512, w_size=1024, device=None):
 
     _, c, h, w = input.size()
 
-    output = torch.zeros((input.size(0), 20, h, w))
+    output = torch.zeros((input.size(0), num_classes, h, w))
 
     for i in range(0, h - overlap, h_size - overlap):
         r_end = i + h_size if i + h_size < h else h
@@ -226,7 +226,7 @@ def main(args, device, class_list):
             with torch.no_grad():
                 for iter, batch in enumerate(val_dataloader):
                     img = batch[0][0]
-                    prd_masks = split_forward(predictor, img, h_size=512, w_size=1024, device=device)
+                    prd_masks = split_forward(predictor, img, args.num_classes+1, h_size=512, w_size=1024, device=device)
 
                     mask = batch[0][1].squeeze(1)[0]
                     img_name = batch[1][0]
