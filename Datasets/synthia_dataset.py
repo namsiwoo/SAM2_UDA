@@ -99,10 +99,10 @@ class synthia_dataset(torch.utils.data.Dataset): #NO Sky
 
         if self.split == 'train':
             self.transform = get_transforms({
-                'random_resize': [0.8, 1.25],
-                'horizontal_flip': False,
-                'random_affine': 0.3,
-                'random_rotation': 30,
+                # 'random_resize': [0.8, 1.25],
+                # 'horizontal_flip': False,
+                # 'random_affine': 0.3,
+                # 'random_rotation': 30,
                 'random_crop': (512, 1024),
                 'to_tensor': 2, # number of img
                 'normalize': np.array([self.mean, self.std])
