@@ -140,7 +140,7 @@ def main(args, device, class_list):
 
     optimizer = torch.optim.AdamW(params=predictor.model.parameters(), lr=args.lr) #, weight_decay=4e-5
     # lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 20, eta_min=1.0e-7)
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.7)
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.7)
     scaler = torch.cuda.amp.GradScaler()  # set mixed precision
 
     criterion_dice = SoftDiceLoss()
