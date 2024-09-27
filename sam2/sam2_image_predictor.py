@@ -128,7 +128,7 @@ class SAM2ImagePredictor:
         self._is_image_set = True
         logging.info("Image embeddings computed.")
 
-    # @torch.no_grad()
+    @torch.no_grad()
     def set_image_batch(
         self,
         image_list: List[Union[np.ndarray]],
