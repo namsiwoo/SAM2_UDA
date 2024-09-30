@@ -163,6 +163,7 @@ def main(args, device, class_list):
         for iter, batch in enumerate(train_dataloader): # batch[0]
             # with torch.cuda.amp.autocast():  # cast to mix precision
             img = list(batch[0][0].permute(0, 2, 3, 1).detach().numpy())
+            print(torch.max(torch.tensor(img)), torch.min(torch.tensor(img)))
 
             mask = batch[0][1].squeeze(1).to(device)
             input_point = None
