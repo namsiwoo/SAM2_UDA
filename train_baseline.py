@@ -146,13 +146,13 @@ def main(args, device, class_list):
             if args.use_sam == True:
                 img2 = batch[0][1]
                 # img = torch.cat((img, img2), dim=1)
-                img = (img+img2)/2 / 255
+                img = (img+img2)/2
 
             mask = batch[0][1].squeeze(1).to(device)
             img_name = batch[1][0]
 
             if model_name == 'Unet':
-                pred = model(img.to(device))
+                pred = model(img.to(device)/255)
             else:
                 pred = model(img.to(device))['out']
 
@@ -305,7 +305,7 @@ def main(args, device, class_list):
                     img_name = batch[1][0]
 
                     if model_name == 'Unet':
-                        pred = split_forward(model, img, h_size=512, w_size=1024, device=device)
+                        pred = split_forward(model, img/255, h_size=512, w_size=1024, device=device)
                     else:
                         pred = model(img.to(device))['out']
 
