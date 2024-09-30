@@ -299,7 +299,7 @@ def main(args, device, class_list):
                     if args.use_sam == True:
                         img2 = batch[0][1]
                         # img = torch.cat((img, img2), dim=1)
-                        img = (img + img2) / 2 /255
+                        img = (img + img2) / 2
 
                     mask = batch[0][1].squeeze(1)[0]
                     img_name = batch[1][0]
