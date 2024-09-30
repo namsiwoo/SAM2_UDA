@@ -450,12 +450,12 @@ if __name__ == '__main__':
     parser.add_argument('--test', action='store_true')
 
     parser.add_argument('--model_type', default='deeplabv3_resnet50', help='')
-    # parser.add_argument('--img1_dir',default='/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES/RGB',help='')
-    # parser.add_argument('--img2_dir',default='/media/NAS/nas_70/siwoo_data/UDA_citycapes/synthia',help='sam result')
-    # parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES/GT/LABELS')
+    parser.add_argument('--img1_dir',default='/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES/RGB',help='')
+    parser.add_argument('--img2_dir',default='/media/NAS/nas_70/siwoo_data/UDA_citycapes/synthia',help='sam result')
+    parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/synthia/RAND_CITYSCAPES/GT/LABELS')
 
-    parser.add_argument('--img_dir',default='/media/NAS/nas_187/datasets/cityscapes/leftImg8bit_trainvaltest/leftImg8bit',help='')
-    parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/cityscapes/gtFine_trainvaltest/gtFine')
+    # parser.add_argument('--img_dir',default='/media/NAS/nas_187/datasets/cityscapes/leftImg8bit_trainvaltest/leftImg8bit',help='')
+    # parser.add_argument('--mask_dir',default='/media/NAS/nas_187/datasets/cityscapes/gtFine_trainvaltest/gtFine')
 
     parser.add_argument('--epochs', default=100, type=int, help='')
     parser.add_argument('--batch_size', type=int, default=8, help='')
