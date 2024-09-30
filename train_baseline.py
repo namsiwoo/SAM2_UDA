@@ -477,12 +477,12 @@ if __name__ == '__main__':
     if args.model_type == 'deeplabv3_resnet50':
         args.model_path = '/media/NAS/nas_70/siwoo_data/UDA_citycapes/best_deeplabv3_resnet50_voc_os16.pth'
 
-    class_list = ['void', 'sky', 'building', 'road', 'sidewalk', 'fence', 'vegetation', 'pole', 'car', 'traffic sign',
-                  'pedestrian', 'bicycle', 'motorcycle', 'parking-slot', 'road-work', 'traffic light', 'terrain',
-                  'rider', 'truck', 'bus', 'train', 'wall', 'lanemarking']
+    # class_list = ['void', 'sky', 'building', 'road', 'sidewalk', 'fence', 'vegetation', 'pole', 'car', 'traffic sign',
+    #               'pedestrian', 'bicycle', 'motorcycle', 'parking-slot', 'road-work', 'traffic light', 'terrain',
+    #               'rider', 'truck', 'bus', 'train', 'wall', 'lanemarking']
 
-    # class_list = ['void', 'road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'traffic light', 'traffic sign',
-    #               'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
+    class_list = ['void', 'road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'traffic light', 'traffic sign',
+                  'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
 
 
     print('=' * 40)
