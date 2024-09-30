@@ -143,7 +143,6 @@ def main(args, device, class_list):
 
         for iter, batch in enumerate(train_dataloader): # batch[0]
             img = batch[0][0]
-            print(torch.max(img), torch.min(img), end='  ')
             if args.use_sam == True:
                 img2 = batch[0][1]
                 # img = torch.cat((img, img2), dim=1)
@@ -151,13 +150,11 @@ def main(args, device, class_list):
 
             mask = batch[0][2].squeeze(1).to(device)
             img_name = batch[1][0]
-            print(torch.max(img2), torch.min(img2))
             if model_name == 'Unet':
                 pred = model(img.to(device))
             else:
                 pred = model(img.to(device))['out']
 
-            print(pred.shape, torch.unique(mask))
             iou_loss = criterion_dice(pred, mask)
             ce_loss = criterion_ce(pred, mask)
             loss = iou_loss + ce_loss
