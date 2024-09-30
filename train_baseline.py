@@ -151,7 +151,7 @@ def main(args, device, class_list):
             mask = batch[0][2].squeeze(1).to(device)
             img_name = batch[1][0]
             if model_name == 'Unet':
-                pred = model(img.to(device))
+                pred = model(img.to(device)/255)
             else:
                 pred = model(img.to(device))['out']
 
