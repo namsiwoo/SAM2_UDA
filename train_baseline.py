@@ -150,9 +150,9 @@ def main(args, device, class_list):
 
             mask = batch[0][1].squeeze(1).to(device)
             img_name = batch[1][0]
-
+            print(torch.max(img), torch.min(img))
             if model_name == 'Unet':
-                pred = model(img.to(device)/255)
+                pred = model(img.to(device))
             else:
                 pred = model(img.to(device))['out']
 
