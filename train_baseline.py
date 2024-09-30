@@ -157,6 +157,7 @@ def main(args, device, class_list):
             else:
                 pred = model(img.to(device))['out']
 
+            print(pred.shape, torch.unique(mask))
             iou_loss = criterion_dice(pred, mask)
             ce_loss = criterion_ce(pred, mask)
             loss = iou_loss + ce_loss

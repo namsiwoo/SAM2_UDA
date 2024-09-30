@@ -141,7 +141,6 @@ class synthia_dataset(torch.utils.data.Dataset): #NO Sky
 
         for i in range(len(id2label)):
             mask[mask == i] = id2label[i].trainId
-        print(np.unique(mask))
         mask = Image.fromarray(mask.astype(np.uint8))
 
 
