@@ -25,9 +25,14 @@ colors = loadmat('/media/NAS/nas_70/siwoo_data/UDA_citycapes/color150.mat')['col
 #     for row in reader:
 #         names[int(row[0])] = row[5].split(";")[0]
 
-def split_forward(predictor, input, num_classes, h_size=512, w_size=1024, device=None):
+def split_forward(sam2_model, input, num_classes, h_size=512, w_size=1024, device=None):
     # size = 224
     overlap = 80
+    _bb_feat_sizes = [
+        (256, 256),
+        (128, 128),
+        (64, 64),
+    ]
 
     b, c, h0, w0 = input.size()
 
@@ -62,30 +67,35 @@ def split_forward(predictor, input, num_classes, h_size=512, w_size=1024, device
             input_patch = input[:, :, i:r_end, j:c_end].permute(0, 2, 3, 1)
 
             with torch.no_grad():
-                predictor.set_image_batch(list(input_patch.numpy()))  # apply SAM image encoder to the image
 
-                # mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
-                #                                                                         mask_logits=None, normalize_coords=True)
-                # sparse_embeddings, dense_embeddings = predictor.model.sam_prompt_encoder(points=(unnorm_coords, labels), boxes=None,
-                #                                                                          masks=None, )
+                # predictor.set_image_batch(img)  # apply SAM image encoder to the image
 
-                sparse_embeddings = torch.empty((len(input_patch), 0, predictor.model.sam_prompt_embed_dim), device=device)
-                dense_embeddings = predictor.model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
-                    len(input_patch), -1, predictor.model.sam_image_embedding_size, predictor.model.sam_image_embedding_size
+                backbone_out = sam2_model.forward_image(input_patch.to(device))
+                _, vision_feats, _, _ = sam2_model._prepare_backbone_features(backbone_out)
+                feats = [
+                            feat.permute(1, 2, 0).view(args.batch_size, -1, *feat_size)
+                            for feat, feat_size in zip(vision_feats[::-1], _bb_feat_sizes[::-1])
+                        ][::-1]
+                _features = {"image_embed": feats[-1], "high_res_feats": feats[:-1]}
+
+                sparse_embeddings = torch.empty((len(input_patch), 0, sam2_model.sam_prompt_embed_dim), device=device)
+                dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
+                    len(input_patch), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
                 )
 
                 # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
                 batched_mode = False  # multi mask prediction
                 high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
-                                     predictor._features["high_res_feats"]]
-                low_res_masks, prd_scores, _, _ = predictor.model.sam_mask_decoder_ssm(
-                    image_embeddings=predictor._features["image_embed"],
-                    image_pe=predictor.model.sam_prompt_encoder.get_dense_pe(),
+                                     _features["high_res_feats"]]
+                low_res_masks, prd_scores, _, _ = sam2_model.sam_mask_decoder_ssm(
+                    image_embeddings=_features["image_embed"],
+                    image_pe=sam2_model.sam_prompt_encoder.get_dense_pe(),
                     sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
                     multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
-                prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[
-                    -1])  # Upscale the masks to the original image resolution
 
+                # prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[-1])  # Upscale the masks to the original image resolution
+                prd_masks = F.interpolate(low_res_masks, (input_patch.shape[2], input_patch.shape[3]), mode="bilinear",
+                                          align_corners=False)
 
             output[:, :, ind1_s:ind1_e, ind2_s:ind2_e] = prd_masks[:, :, ind1_s - i:ind1_e - i,
                                                      ind2_s - j:ind2_e - j]
@@ -128,8 +138,8 @@ def main(args, device, class_list):
         if "sam_mask_decoder_ssm" in name:
             para.requires_grad_(True)
         else:
-            # para.requires_grad_(False)
-            para.requires_grad_(True)
+            para.requires_grad_(False)
+            # para.requires_grad_(True)
 
     predictor.model.sam_prompt_encoder.no_mask_embed.requires_grad = True
 
@@ -155,41 +165,54 @@ def main(args, device, class_list):
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, drop_last=True, num_workers=8)
     val_dataloader = DataLoader(val_dataset, num_workers=8)
 
+    _bb_feat_sizes = [
+        (256, 256),
+        (128, 128),
+        (64, 64),
+    ]
+
     max_miou = 0
     total_train_loss = []
     for epoch in range(args.epochs):
         train_loss = 0
-        predictor.model.train()
+        # predictor.model.train()
+        sam2_model.train()
         for iter, batch in enumerate(train_dataloader): # batch[0]
             # with torch.cuda.amp.autocast():  # cast to mix precision
-            img = list(batch[0][0].permute(0, 2, 3, 1).detach().numpy())
-
+            # img = list(batch[0][0].permute(0, 2, 3, 1).detach().numpy())
+            img = batch[0][0]
             mask = batch[0][1].squeeze(1).to(device)
-            input_point = None
-            input_label = None
-            # image, mask, input_point, input_label = read_batch(data)  # load data batch
-            predictor.set_image_batch(img)  # apply SAM image encoder to the image
 
-            # mask_input, unnorm_coords, labels, unnorm_box = predictor._prep_prompts(input_point, input_label, box=None,
-            #                                                                         mask_logits=None, normalize_coords=True)
-            # sparse_embeddings, dense_embeddings = predictor.model.sam_prompt_encoder(points=(unnorm_coords, labels), boxes=None,
-            #                                                                          masks=None, )
+            # predictor.set_image_batch(img)  # apply SAM image encoder to the image
 
-            sparse_embeddings = torch.empty((len(img), 0, predictor.model.sam_prompt_embed_dim), device=device)
-            dense_embeddings = predictor.model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
-                len(img), -1, predictor.model.sam_image_embedding_size, predictor.model.sam_image_embedding_size
+            backbone_out = sam2_model.forward_image(img.to(device))
+            _, vision_feats, _, _ = sam2_model._prepare_backbone_features(backbone_out)
+            feats = [
+                        feat.permute(1, 2, 0).view(args.batch_size, -1, *feat_size)
+                        for feat, feat_size in zip(vision_feats[::-1], _bb_feat_sizes[::-1])
+                    ][::-1]
+            _features = {"image_embed": feats[-1], "high_res_feats": feats[:-1]}
+
+
+
+            sparse_embeddings = torch.empty((len(img), 0, sam2_model.sam_prompt_embed_dim), device=device)
+            dense_embeddings = sam2_model.no_mask_embed.weight.reshape(1, -1, 1, 1).expand(
+                len(img), -1, sam2_model.sam_image_embedding_size, sam2_model.sam_image_embedding_size
             )
 
             # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
             batched_mode = False  # multi mask prediction
             high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
-                                 predictor._features["high_res_feats"]]
-            low_res_masks, prd_scores, _, _ = predictor.model.sam_mask_decoder_ssm(
-                image_embeddings=predictor._features["image_embed"],
-                image_pe=predictor.model.sam_prompt_encoder.get_dense_pe(),
+                                 _features["high_res_feats"]]
+            low_res_masks, prd_scores, _, _ = sam2_model.sam_mask_decoder_ssm(
+                image_embeddings=_features["image_embed"],
+                image_pe=sam2_model.sam_prompt_encoder.get_dense_pe(),
                 sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
                 multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
-            prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[-1])  # Upscale the masks to the original image resolution
+
+            # prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[-1])  # Upscale the masks to the original image resolution
+            prd_masks = F.interpolate(low_res_masks, (mask.shape[1], mask.shape[2]), mode="bilinear", align_corners=False)
+
 
             iou_loss = criterion_dice(prd_masks, mask)
             ce_loss = criterion_ce(prd_masks, mask)
