@@ -152,6 +152,7 @@ class cityscapes_dataset(torch.utils.data.Dataset):
         sample = [img, mask]
 
         sample = self.transform(sample)
+        print(torch.max(sample[0]), torch.min(sample[0]))
 
         return sample, str(img_name)
     def __len__(self):
