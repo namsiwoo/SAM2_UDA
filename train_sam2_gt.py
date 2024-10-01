@@ -187,6 +187,7 @@ def main(args, device, class_list):
 
             backbone_out = sam2_model.forward_image(img.to(device))
             _, vision_feats, _, _ = sam2_model._prepare_backbone_features(backbone_out)
+            vision_feats[-1] = vision_feats[-1] + sam2_model.no_mem_embed
             feats = [
                         feat.permute(1, 2, 0).view(args.batch_size, -1, *feat_size)
                         for feat, feat_size in zip(vision_feats[::-1], _bb_feat_sizes[::-1])
