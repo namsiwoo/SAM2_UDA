@@ -118,7 +118,7 @@ class cityscapes_dataset(torch.utils.data.Dataset):
                 # 'horizontal_flip': False,
                 # 'random_affine': 0.3,
                 # 'random_rotation': 30,
-                'random_crop': (512, 1024),
+                'random_crop': (512, 512),
                 'to_tensor': 1, # number of img
                 'normalize': np.array([self.mean, self.std])
             })

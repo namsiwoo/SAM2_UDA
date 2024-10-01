@@ -255,7 +255,7 @@ def main(args, device, class_list):
             with torch.no_grad():
                 for iter, batch in enumerate(val_dataloader):
                     img = batch[0][0]
-                    prd_masks = split_forward(predictor, img, args.num_classes+1, h_size=512, w_size=1024, device=device)
+                    prd_masks = split_forward(predictor, img, args.num_classes+1, h_size=512, w_size=512, device=device)
 
                     mask = batch[0][1].squeeze(1)[0]
                     img_name = batch[1][0]
