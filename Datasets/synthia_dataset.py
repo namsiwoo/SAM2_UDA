@@ -147,7 +147,7 @@ class synthia_dataset(torch.utils.data.Dataset): #NO Sky
         sample = [img1, img2, mask]
 
         sample = self.transform(sample)
-        print(torch.min(sample[0]), torch.min(sample[1]), torch.max(sample[0]), torch.max(sample[1]))
+        # print(torch.min(sample[0]), torch.min(sample[1]), torch.max(sample[0]), torch.max(sample[1]))
 
         return sample, str(img_name)
     def __len__(self):
