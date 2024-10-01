@@ -186,8 +186,8 @@ def main(args, device, class_list):
             # predictor.set_image_batch(img)  # apply SAM image encoder to the image
 
             backbone_out = sam2_model.forward_image(img.to(device))
+            print(img.shape)
             _, vision_feats, _, _ = sam2_model._prepare_backbone_features(backbone_out)
-            print(vision_feats.shape)
             vision_feats[-1] = vision_feats[-1] + sam2_model.no_mem_embed
             feats = [
                         feat.permute(1, 2, 0).view(img.shape[0], -1, *feat_size)
