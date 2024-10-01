@@ -189,7 +189,7 @@ def main(args, device, class_list):
             _, vision_feats, _, _ = sam2_model._prepare_backbone_features(backbone_out)
             vision_feats[-1] = vision_feats[-1] + sam2_model.no_mem_embed
             feats = [
-                        feat.permute(1, 2, 0).view(args.batch_size, -1, *feat_size)
+                        feat.permute(1, 2, 0).view(img.shape[0], -1, *feat_size)
                         for feat, feat_size in zip(vision_feats[::-1], _bb_feat_sizes[::-1])
                     ][::-1]
             _features = {"image_embed": feats[-1], "high_res_feats": feats[:-1]}
