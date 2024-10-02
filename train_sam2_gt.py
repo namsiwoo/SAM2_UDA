@@ -172,6 +172,10 @@ def main(args, device, class_list):
             img = list(batch[0][0].permute(0, 2, 3, 1).detach().numpy())
             mask = batch[0][1].squeeze(1).to(device)
 
+            import pdb
+            pdb.set_trace()
+
+
             predictor.set_image_batch(img)  # apply SAM image encoder to the image
 
             sparse_embeddings = torch.empty((len(img), 0, sam2_model.sam_prompt_embed_dim), device=device)
@@ -232,7 +236,7 @@ def main(args, device, class_list):
             with torch.no_grad():
                 for iter, batch in enumerate(val_dataloader):
                     img = batch[0][0]
-                    prd_masks = split_forward(predictor, sam2_model, img, args.num_classes+1, h_size=512, w_size=512, device=device)
+                    prd_masks = split_forward(predictor, sam2_model, img, args.num_classes+1, h_size=512, w_size=1024, device=device)
 
                     mask = batch[0][1].squeeze(1)[0]
                     img_name = batch[1][0]

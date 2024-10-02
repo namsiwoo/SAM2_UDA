@@ -110,7 +110,6 @@ def main(args, device, class_list):
     model_name = 'Unet'
     model = R2U_Net(img_ch = input_channel, output_ch=args.num_classes+1)
 
-
     model = model.to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
@@ -119,13 +118,11 @@ def main(args, device, class_list):
     criterion_dice = SoftDiceLoss()
     criterion_ce = torch.nn.CrossEntropyLoss()
 
-
     train_dataset = synthia_dataset(args, 'train')
     val_dataset = synthia_dataset(args, 'val')
 
     # train_dataset = cityscapes_dataset(args, 'train')
     # val_dataset = cityscapes_dataset(args, 'val')
-
 
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=False, drop_last=True, num_workers=8)
     val_dataloader = DataLoader(val_dataset)
