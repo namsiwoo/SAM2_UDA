@@ -77,13 +77,12 @@ def split_forward(predictor, sam2_model, input, num_classes, h_size=512, w_size=
 
                 # batched_mode = unnorm_coords.shape[0] > 1  # multi mask prediction
                 batched_mode = False  # multi mask prediction
-                high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
-                                     predictor._features["high_res_feats"]]
+
                 low_res_masks, prd_scores, _, _ = sam2_model.sam_mask_decoder_ssm(
-                    image_embeddings=predictor.features["image_embed"],
+                    image_embeddings=predictor._features["image_embed"],
                     image_pe=sam2_model.sam_prompt_encoder.get_dense_pe(),
                     sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
-                    multimask_output=True, repeat_image=batched_mode, high_res_features=predictor.features["high_res_feats"], )
+                    multimask_output=True, repeat_image=batched_mode, high_res_features=predictor._features["high_res_feats"], )
 
                 prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[-1])  # Upscale the masks to the original image resolution
 
