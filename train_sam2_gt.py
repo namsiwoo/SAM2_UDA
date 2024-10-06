@@ -187,7 +187,7 @@ def main(args, device, class_list):
                 image_embeddings=predictor._features["image_embed"],
                 image_pe=sam2_model.sam_prompt_encoder.get_dense_pe(),
                 sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
-                multimask_output=True, repeat_image=batched_mode, high_res_features=predictor._eatures["high_res_feats"], )
+                multimask_output=True, repeat_image=batched_mode, high_res_features=predictor._features["high_res_feats"], )
 
             prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[-1])  # Upscale the masks to the original image resolution # (2, 20, 512, 1024)
             # prd_masks = F.interpolate(low_res_masks, (mask.shape[1], mask.shape[2]), mode="bilinear", align_corners=False)
