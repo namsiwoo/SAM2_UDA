@@ -64,7 +64,7 @@ def split_forward(predictor, sam2_model, input, num_classes, h_size=512, w_size=
             ind2_s = j + overlap // 2 if j > 0 else 0
             ind2_e = j + w_size - overlap // 2 if j + w_size < w else w
 
-            input_patch = input[:, :, i:r_end, j:c_end].permute(0, 2, 3, 1)
+            input_patch = input[:, :, i:r_end, j:c_end]
 
             with torch.no_grad():
                 img = list(input_patch.permute(0, 2, 3, 1).numpy())
@@ -80,10 +80,10 @@ def split_forward(predictor, sam2_model, input, num_classes, h_size=512, w_size=
                 high_res_features = [feat_level[-1].unsqueeze(0) for feat_level in
                                      predictor._features["high_res_feats"]]
                 low_res_masks, prd_scores, _, _ = sam2_model.sam_mask_decoder_ssm(
-                    image_embeddings=_predictor.features["image_embed"],
+                    image_embeddings=predictor.features["image_embed"],
                     image_pe=sam2_model.sam_prompt_encoder.get_dense_pe(),
                     sparse_prompt_embeddings=sparse_embeddings, dense_prompt_embeddings=dense_embeddings,
-                    multimask_output=True, repeat_image=batched_mode, high_res_features=high_res_features, )
+                    multimask_output=True, repeat_image=batched_mode, high_res_features=predictor.features["high_res_feats"], )
 
                 prd_masks = predictor._transforms.postprocess_masks(low_res_masks, predictor._orig_hw[-1])  # Upscale the masks to the original image resolution
 
